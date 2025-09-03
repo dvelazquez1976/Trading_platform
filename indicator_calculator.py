@@ -11,33 +11,47 @@ def calcular_indicadores(datos):
     Returns:
         pd.DataFrame: DataFrame con los indicadores calculados.
     """
-    datos.ta.sma(close=datos['cierre'], length=30, append=True)
-    datos.ta.sma(close=datos['cierre'], length=60, append=True)
-    datos.ta.sma(close=datos['cierre'], length=90, append=True)
+    # Create a copy of the DataFrame and rename columns for pandas_ta compatibility
+    df_ta = datos.copy()
+    df_ta.rename(columns={
+        'apertura': 'open',
+        'maximo': 'high',
+        'minimo': 'low',
+        'cierre': 'close',
+        'volumen': 'volume'
+    }, inplace=True)
 
-    # RSI (Índice de Fuerza Relativa)
-    datos.ta.rsi(close=datos['cierre'], length=14, append=True)
+    # Create a Strategy
+    MyStrategy = ta.Strategy(
+        name="MyStrategy",
+        description="My custom strategy",
+        ta=[
+            {"kind": "sma", "length": 30},
+            {"kind": "sma", "length": 60},
+            {"kind": "sma", "length": 90},
+            {"kind": "rsi", "length": 14},
+            {"kind": "stoch", "k": 14, "d": 3},
+            {"kind": "macd", "fast": 12, "slow": 26, "signal": 9},
+            {"kind": "bbands", "length": 20, "std": 2},
+            {"kind": "cci", "length": 20},
+            {"kind": "adx", "length": 14},
+            {"kind": "mfi", "length": 14},
+            {"kind": "willr", "length": 14},
+            {"kind": "ao", "fast": 5, "slow": 34},
+            {"kind": "roc", "length": 12},
+        ]
+    )
 
-    # Estocástico (Stochastic Oscillator)
-    datos.ta.stoch(high=datos['maximo'], low=datos['minimo'], close=datos['cierre'], k=14, d=3, append=True)
+    # Run the strategy
+    df_ta.ta.strategy(MyStrategy)
 
-    # MACD (Moving Average Convergence Divergence)
-    datos.ta.macd(close=datos['cierre'], fast=12, slow=26, signal=9, append=True)
+    # Rename columns to match the original names
+    df_ta.rename(columns={
+        'open': 'apertura',
+        'high': 'maximo',
+        'low': 'minimo',
+        'close': 'cierre',
+        'volume': 'volumen'
+    }, inplace=True)
 
-    # Bandas de Bollinger (Bollinger Bands)
-    bbands = datos.ta.bbands(close=datos['cierre'], length=20, std=2)
-    datos['BBL_20_2'] = bbands['BBL_20_2']
-    datos['BBM_20_2'] = bbands['BBM_20_2']
-    datos['BBU_20_2'] = bbands['BBU_20_2']
-
-    # CCI (Commodity Channel Index)
-    datos.ta.cci(close=datos['cierre'], length=20, append=True)
-
-    # ADX (Average Directional Movement Index)
-    datos.ta.adx(high=datos['maximo'], low=datos['minimo'], close=datos['cierre'], length=14, append=True)
-
-    # MFI (Money Flow Index) - Requires 'volume' column
-    # Assuming 'volumen' column exists in the DataFrame
-    datos.ta.mfi(high=datos['maximo'], low=datos['minimo'], close=datos['cierre'], volume=datos['volumen'], length=14, append=True)
-    
-    return datos
+    return df_ta

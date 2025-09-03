@@ -1,0 +1,5 @@
+pandas
+yfinance
+pandas-ta-openbb
+tabulate
+plotly
