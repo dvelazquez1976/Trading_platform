@@ -1,8 +1,9 @@
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
+import os
 
-def generar_grafico(datos_historicos, resultado_analisis, ticker):
+def generar_grafico(datos_historicos, resultado_analisis, ticker, salidas_dir):
     """
     Genera un gráfico interactivo con los datos históricos y los resultados del análisis.
 
@@ -10,6 +11,7 @@ def generar_grafico(datos_historicos, resultado_analisis, ticker):
         datos_historicos (pd.DataFrame): DataFrame con los datos de precios.
         resultado_analisis (dict): Diccionario con los resultados del análisis.
         ticker (str): El ticker de la acción.
+        salidas_dir (str): El directorio donde se guardarán los archivos HTML.
     """
     fig = make_subplots(
         rows=4,
@@ -56,4 +58,5 @@ def generar_grafico(datos_historicos, resultado_analisis, ticker):
         height=800
     )
 
-    fig.write_html(f"c:\\Python\\Plataforma_Trading\\salidas\\{ticker}_analisis.html")
+    output_path = os.path.join(salidas_dir, f"{ticker}_analisis.html")
+    fig.write_html(output_path)

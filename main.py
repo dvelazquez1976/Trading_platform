@@ -88,7 +88,7 @@ def main():
 
                     # 6. Generación de Gráficos
                     print("Generando gráfico interactivo...")
-                    visualizer.generar_grafico(datos_con_indicadores, resultado_analisis, ticker)
+                    visualizer.generar_grafico(datos_con_indicadores, resultado_analisis, ticker, salidas_dir)
 
                     # Preparar datos para la tabla
                     row_data = [
