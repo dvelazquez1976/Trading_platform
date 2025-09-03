@@ -12,10 +12,14 @@ from tabulate import tabulate
 import os
 
 # Definir el directorio base del proyecto
-BASE_DIR = os.path.dirname(os.path.abspath(__name__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def main():
     """Flujo de ejecución principal del sistema de análisis de trading."""
+    # Crear el directorio de salidas si no existe
+    salidas_dir = os.path.join(BASE_DIR, 'salidas')
+    os.makedirs(salidas_dir, exist_ok=True)
+
     # Crear la base de datos y la tabla si no existen
     data_storage.crear_base_de_datos()
 
@@ -98,13 +102,15 @@ def main():
                         row_data.append(resultado_analisis["señales"][indicator])
                     
                     # Añadir los últimos valores de los indicadores a la tabla
+                    # Añadir los últimos valores de los indicadores a la tabla
+                                        # Añadir los últimos valores de los indicadores a la tabla
                     last_row = datos_con_indicadores.iloc[-1]
                     row_data.append(f"{last_row['SMA_30']:.2f}")
                     row_data.append(f"{last_row['RSI_14']:.2f}")
                     row_data.append(f"{last_row['STOCHk_14_3_3']:.2f}")
                     row_data.append(f"{last_row['MACD_12_26_9']:.2f}")
                     row_data.append(f"{last_row['BBM_20_2']:.2f}")
-                    row_data.append(f"{last_row['CCI_20']:.2f}")
+                    row_data.append(f"{last_row['CCI_20_0.015']:.2f}")
                     row_data.append(f"{last_row['ADX_14']:.2f}")
                     row_data.append(f"{last_row['MFI_14']:.2f}")
                     row_data.append(f"{last_row['WILLR_14']:.2f}")
@@ -128,8 +134,7 @@ def main():
                     'volumen': 'volume'
                 }
 
-                salidas_dir = os.path.join(BASE_DIR, 'salidas')
-                os.makedirs(salidas_dir, exist_ok=True) # Create the directory if it doesn't exist
+                
 
                 for original_col, csv_name in data_types.items():
                     print(f"Generando archivo CSV para {original_col}...")
@@ -160,7 +165,7 @@ def main():
                 print("No se encontraron datos históricos para exportar a CSV.")
             # --- End CSV Export Logic ---
 
-            headers = ["Ticker", "Empresa", "Fecha", "Precio Cierre", "Recomendación", "Cruce Medias", "RSI", "Estocastico", "MACD", "Bandas Bollinger", "Williams %R", "Awesome Osc", "ROC", "SMA_30", "RSI_14", "STOCHk_14_3_3", "MACD_12_26_9", "BBM_20_2", "CCI_20", "ADX_14", "MFI_14", "WILLR_14", "AO_5_34", "ROC_12"]
+            headers = ["Ticker", "Empresa", "Fecha", "Precio Cierre", "Recomendación", "Cruce Medias", "RSI", "Estocastico", "MACD", "Bandas Bollinger", "Williams %R", "Awesome Osc", "ROC", "SMA_30", "RSI_14", "STOCHk_14_3_3", "MACD_12_26_9", "BBM_20_2", "CCI_20_0.015", "ADX_14", "MFI_14", "WILLR_14", "AO_5_34", "ROC_12"]
             print("\n" + tabulate(all_results, headers=headers, tablefmt="grid"))
 
     except IOError as e:
@@ -171,7 +176,6 @@ def main():
         sys.stdout = original_stdout # Restaurar la salida estándar
 
     print(f"Análisis completado. Verifique {salida_path} para los resultados.")
-    salidas_dir = os.path.join(BASE_DIR, 'salidas') # Definir salidas_dir también fuera del bloque try
     print(f"Archivos CSV de datos históricos generados en la carpeta '{os.path.basename(salidas_dir)}'.")
     print(f"Archivos HTML con gráficos interactivos generados en la carpeta '{os.path.basename(salidas_dir)}'.")
 
