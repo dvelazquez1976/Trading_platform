@@ -24,12 +24,16 @@ def crear_base_de_datos():
 def guardar_datos(datos, ticker):
     """Guarda los datos de precios en la base de datos, evitando duplicados."""
     conn = sqlite3.connect('plataforma_trading.db')
-    datos['ticker'] = ticker
-    try:
-        datos.to_sql('precios_acciones', conn, if_exists='append', index=False)
-    except sqlite3.IntegrityError:
-        # Evitar duplicados
-        pass
+    cursor = conn.cursor()
+    for _, row in datos.iterrows():
+        try:
+            cursor.execute(
+                "INSERT INTO precios_acciones (ticker, fecha, apertura, maximo, minimo, cierre, volumen) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (ticker, row['fecha'].date(), row['apertura'], row['maximo'], row['minimo'], row['cierre'], row['volumen'])
+            )
+        except sqlite3.IntegrityError:
+            pass  # Ignore duplicates
+    conn.commit()
     conn.close()
 
 def leer_datos(ticker):
