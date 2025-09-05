@@ -27,6 +27,7 @@ def descargar_datos(ticker, fecha_inicio, fecha_fin):
     """
     try:
         datos = yf.download(ticker, start=fecha_inicio, end=fecha_fin, auto_adjust=False)
+        
         if datos.empty:
             print(f"No se encontraron datos para {ticker} en el rango de fechas especificado.")
             return None, None

@@ -3,7 +3,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import os
 
-def generar_grafico(datos_historicos, resultado_analisis, ticker, salidas_dir):
+def generar_grafico(datos_historicos, resultado_analisis, ticker, output_dir):
     """
     Genera un gráfico interactivo con los datos históricos y los resultados del análisis.
 
@@ -11,7 +11,7 @@ def generar_grafico(datos_historicos, resultado_analisis, ticker, salidas_dir):
         datos_historicos (pd.DataFrame): DataFrame con los datos de precios.
         resultado_analisis (dict): Diccionario con los resultados del análisis.
         ticker (str): El ticker de la acción.
-        salidas_dir (str): El directorio donde se guardarán los archivos HTML.
+        output_dir (str): El directorio donde se guardará el archivo HTML.
     """
     fig = make_subplots(
         rows=4,
@@ -58,5 +58,5 @@ def generar_grafico(datos_historicos, resultado_analisis, ticker, salidas_dir):
         height=800
     )
 
-    output_path = os.path.join(salidas_dir, f"{ticker}_analisis.html")
+    output_path = os.path.join(output_dir, f"{ticker}_analisis.html")
     fig.write_html(output_path)
