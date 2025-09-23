@@ -1,4 +1,6 @@
 import pandas as pd
+from config_manager import config_manager
+from advanced_signals import generate_advanced_signals, get_advanced_indicator_values
 
 def generar_senales(datos):
     """
@@ -10,6 +12,9 @@ def generar_senales(datos):
     Returns:
         dict: Un diccionario con las señales de cada indicador.
     """
+    # Obtener umbrales de configuración
+    thresholds = config_manager.get_signal_thresholds()
+
     senales = {
         "Cruce_Medias": "KEEP/NO SIGNAL",
         "RSI": "KEEP/NO SIGNAL",
@@ -31,16 +36,20 @@ def generar_senales(datos):
         senales["Cruce_Medias"] = "VENTA"
 
     # 2. RSI
-    if ultimo_dato['RSI_14'] < 30:
+    rsi_oversold = thresholds.get('rsi_oversold', 30)
+    rsi_overbought = thresholds.get('rsi_overbought', 70)
+    if ultimo_dato['RSI_14'] < rsi_oversold:
         senales["RSI"] = "COMPRA"
-    elif ultimo_dato['RSI_14'] > 70:
+    elif ultimo_dato['RSI_14'] > rsi_overbought:
         senales["RSI"] = "VENTA"
 
     # 3. Estocástico
-    if ultimo_dato['STOCHk_14_3_3'] < 20 and ultimo_dato['STOCHd_14_3_3'] < 20 and \
+    stoch_oversold = thresholds.get('stoch_oversold', 20)
+    stoch_overbought = thresholds.get('stoch_overbought', 80)
+    if ultimo_dato['STOCHk_14_3_3'] < stoch_oversold and ultimo_dato['STOCHd_14_3_3'] < stoch_oversold and \
        ultimo_dato['STOCHk_14_3_3'] > ultimo_dato['STOCHd_14_3_3'] and dato_anterior['STOCHk_14_3_3'] <= dato_anterior['STOCHd_14_3_3']:
         senales["Estocastico"] = "COMPRA"
-    elif ultimo_dato['STOCHk_14_3_3'] > 80 and ultimo_dato['STOCHd_14_3_3'] > 80 and \
+    elif ultimo_dato['STOCHk_14_3_3'] > stoch_overbought and ultimo_dato['STOCHd_14_3_3'] > stoch_overbought and \
          ultimo_dato['STOCHk_14_3_3'] < ultimo_dato['STOCHd_14_3_3'] and dato_anterior['STOCHk_14_3_3'] >= dato_anterior['STOCHd_14_3_3']:
         senales["Estocastico"] = "VENTA"
 
@@ -57,9 +66,11 @@ def generar_senales(datos):
         senales["Bandas_Bollinger"] = "VENTA"
 
     # 6. Williams %R
-    if ultimo_dato['WILLR_14'] < -80:
+    willr_oversold = thresholds.get('willr_oversold', -80)
+    willr_overbought = thresholds.get('willr_overbought', -20)
+    if ultimo_dato['WILLR_14'] < willr_oversold:
         senales["Williams_R"] = "COMPRA"
-    elif ultimo_dato['WILLR_14'] > -20:
+    elif ultimo_dato['WILLR_14'] > willr_overbought:
         senales["Williams_R"] = "VENTA"
 
     # 7. Awesome Oscillator
@@ -69,12 +80,18 @@ def generar_senales(datos):
         senales["Awesome_Oscillator"] = "VENTA"
 
     # 8. Rate of Change (ROC)
-    if ultimo_dato['ROC_12'] > 5:
+    roc_bullish = thresholds.get('roc_bullish', 5)
+    roc_bearish = thresholds.get('roc_bearish', -5)
+    if ultimo_dato['ROC_12'] > roc_bullish:
         senales["ROC"] = "COMPRA"
-    elif ultimo_dato['ROC_12'] < -5:
+    elif ultimo_dato['ROC_12'] < roc_bearish:
         senales["ROC"] = "VENTA"
 
-    # Resumen de recomendación
+    # Generar señales avanzadas si están habilitadas
+    senales_avanzadas = generate_advanced_signals(datos)
+    senales.update(senales_avanzadas)
+
+    # Resumen de recomendación (incluye señales avanzadas)
     compras = list(senales.values()).count("COMPRA")
     ventas = list(senales.values()).count("VENTA")
 
