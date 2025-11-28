@@ -245,3 +245,126 @@ def clean_dataframe(df: pd.DataFrame, drop_na: bool = True) -> pd.DataFrame:
         df_clean.dropna(inplace=True)
 
     return df_clean
+
+def prepare_summary_table_row(resultado_analisis: Dict[str, Any], company_name: str) -> list:
+    """
+    Prepara una fila para la tabla resumen (información general).
+
+    Args:
+        resultado_analisis: Diccionario con resultados del análisis
+        company_name: Nombre de la empresa
+
+    Returns:
+        Lista con datos básicos de la fila
+    """
+    return [
+        resultado_analisis["ticker"],
+        company_name,
+        resultado_analisis["fecha"],
+        format_price(resultado_analisis["precio_cierre"]),
+        resultado_analisis["resumen"]
+    ]
+
+def prepare_signals_table_row(resultado_analisis: Dict[str, Any], basic: bool = True) -> list:
+    """
+    Prepara una fila para la tabla de señales.
+
+    Args:
+        resultado_analisis: Diccionario con resultados del análisis
+        basic: True para indicadores básicos, False para avanzados
+
+    Returns:
+        Lista con señales de indicadores
+    """
+    from constants import AVAILABLE_INDICATORS, ADVANCED_INDICATORS
+
+    row_data = [resultado_analisis["ticker"]]
+
+    indicators = AVAILABLE_INDICATORS if basic else ADVANCED_INDICATORS
+
+    for indicator in indicators:
+        if indicator in resultado_analisis["señales"]:
+            row_data.append(resultado_analisis["señales"][indicator])
+        else:
+            row_data.append("KEEP/NO SIGNAL")
+
+    return row_data
+
+def prepare_values_table_row(resultado_analisis: Dict[str, Any],
+                             datos_con_indicadores: pd.DataFrame,
+                             basic: bool = True) -> list:
+    """
+    Prepara una fila para la tabla de valores de indicadores.
+
+    Args:
+        resultado_analisis: Diccionario con resultados del análisis
+        datos_con_indicadores: DataFrame con indicadores calculados
+        basic: True para indicadores básicos, False para avanzados
+
+    Returns:
+        Lista con valores de indicadores
+    """
+    from constants import INDICATOR_RESULT_COLUMNS, ADVANCED_INDICATOR_COLUMNS
+    from advanced_signals import get_advanced_indicator_values
+
+    row_data = [resultado_analisis["ticker"]]
+
+    if basic:
+        # Valores de indicadores básicos
+        columns = INDICATOR_RESULT_COLUMNS
+        if not datos_con_indicadores.empty:
+            for column in columns:
+                value = safe_get_last_value(datos_con_indicadores, column)
+                if isinstance(value, (int, float)):
+                    row_data.append(format_price(value))
+                else:
+                    row_data.append(str(value))
+        else:
+            row_data.extend(["N/A"] * len(columns))
+    else:
+        # Valores de indicadores avanzados
+        columns = ADVANCED_INDICATOR_COLUMNS
+        if not datos_con_indicadores.empty:
+            advanced_values = get_advanced_indicator_values(datos_con_indicadores)
+            for column in columns:
+                if column in advanced_values:
+                    value = advanced_values[column]
+                    if isinstance(value, (int, float)):
+                        row_data.append(format_price(value))
+                    else:
+                        row_data.append(str(value))
+                else:
+                    row_data.append("N/A")
+        else:
+            row_data.extend(["N/A"] * len(columns))
+
+    return row_data
+
+def get_summary_table_headers() -> list:
+    """Retorna los headers para la tabla resumen."""
+    from constants import BASE_TABLE_HEADERS
+    return BASE_TABLE_HEADERS.copy()
+
+def get_signals_table_headers(basic: bool = True) -> list:
+    """
+    Retorna los headers para la tabla de señales.
+
+    Args:
+        basic: True para indicadores básicos, False para avanzados
+    """
+    from constants import AVAILABLE_INDICATORS, ADVANCED_INDICATORS
+
+    indicators = AVAILABLE_INDICATORS if basic else ADVANCED_INDICATORS
+    return ["Ticker"] + indicators
+
+def get_values_table_headers(basic: bool = True) -> list:
+    """
+    Retorna los headers para la tabla de valores.
+
+    Args:
+        basic: True para indicadores básicos, False para avanzados
+    """
+    from constants import INDICATOR_RESULT_COLUMNS, ADVANCED_INDICATOR_COLUMNS
+
+    columns = INDICATOR_RESULT_COLUMNS if basic else ADVANCED_INDICATOR_COLUMNS
+    return ["Ticker"] + columns

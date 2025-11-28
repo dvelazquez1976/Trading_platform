@@ -1,59 +1,208 @@
+"""Módulo para generación de gráficos interactivos de análisis técnico."""
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
+from typing import Dict
+import os
+from logger_config import get_logger
 
-def generar_grafico(datos_historicos, resultado_analisis, ticker):
+logger = get_logger(__name__)
+
+# Constantes de configuración de gráficos
+CHART_HEIGHT = 800
+CHART_CONFIG = {
+    'price_row': 1,
+    'volume_row': 2,
+    'rsi_row': 3,
+    'willr_row': 4,
+    'row_heights': [0.6, 0.1, 0.15, 0.15],
+    'vertical_spacing': 0.02
+}
+
+# Umbrales de indicadores para líneas de referencia
+RSI_OVERBOUGHT = 70
+RSI_OVERSOLD = 30
+WILLR_OVERBOUGHT = -20
+WILLR_OVERSOLD = -80
+
+
+def _crear_estructura_grafico(ticker: str) -> go.Figure:
+    """
+    Crea la estructura base del gráfico con subplots.
+
+    Args:
+        ticker: Ticker de la acción
+
+    Returns:
+        Figura de Plotly configurada
+    """
+    return make_subplots(
+        rows=4,
+        cols=1,
+        shared_xaxes=True,
+        vertical_spacing=CHART_CONFIG['vertical_spacing'],
+        subplot_titles=(f'{ticker} Candlestick', 'Volumen', 'RSI', 'Williams %R'),
+        row_heights=CHART_CONFIG['row_heights']
+    )
+
+def _agregar_candlestick(fig: go.Figure, datos: pd.DataFrame):
+    """Agrega gráfico de velas japonesas."""
+    fig.add_trace(
+        go.Candlestick(
+            x=datos['fecha'],
+            open=datos['apertura'],
+            high=datos['maximo'],
+            low=datos['minimo'],
+            close=datos['cierre'],
+            name='Precio'
+        ),
+        row=CHART_CONFIG['price_row'], col=1
+    )
+
+
+def _agregar_medias_moviles(fig: go.Figure, datos: pd.DataFrame):
+    """Agrega líneas de medias móviles al gráfico."""
+    fig.add_trace(
+        go.Scatter(
+            x=datos['fecha'],
+            y=datos['SMA_30'],
+            name='SMA 30',
+            line=dict(color='blue', width=1)
+        ),
+        row=CHART_CONFIG['price_row'], col=1
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=datos['fecha'],
+            y=datos['SMA_60'],
+            name='SMA 60',
+            line=dict(color='orange', width=1)
+        ),
+        row=CHART_CONFIG['price_row'], col=1
+    )
+
+
+def _agregar_volumen(fig: go.Figure, datos: pd.DataFrame):
+    """Agrega gráfico de barras de volumen."""
+    fig.add_trace(
+        go.Bar(
+            x=datos['fecha'],
+            y=datos['volumen'],
+            name='Volumen'
+        ),
+        row=CHART_CONFIG['volume_row'], col=1
+    )
+
+
+def _agregar_rsi(fig: go.Figure, datos: pd.DataFrame):
+    """Agrega indicador RSI con líneas de referencia."""
+    fig.add_trace(
+        go.Scatter(
+            x=datos['fecha'],
+            y=datos['RSI'],
+            name='RSI',
+            line=dict(color='purple')
+        ),
+        row=CHART_CONFIG['rsi_row'], col=1
+    )
+
+    # Líneas de referencia
+    fig.add_hline(
+        y=RSI_OVERBOUGHT,
+        line_dash="dash",
+        line_color="red",
+        row=CHART_CONFIG['rsi_row'], col=1
+    )
+    fig.add_hline(
+        y=RSI_OVERSOLD,
+        line_dash="dash",
+        line_color="green",
+        row=CHART_CONFIG['rsi_row'], col=1
+    )
+
+
+def _agregar_williams_r(fig: go.Figure, datos: pd.DataFrame):
+    """Agrega indicador Williams %R con líneas de referencia."""
+    fig.add_trace(
+        go.Scatter(
+            x=datos['fecha'],
+            y=datos['WILLR'],
+            name='Williams %R',
+            line=dict(color='teal')
+        ),
+        row=CHART_CONFIG['willr_row'], col=1
+    )
+
+    # Líneas de referencia
+    fig.add_hline(
+        y=WILLR_OVERBOUGHT,
+        line_dash="dash",
+        line_color="red",
+        row=CHART_CONFIG['willr_row'], col=1
+    )
+    fig.add_hline(
+        y=WILLR_OVERSOLD,
+        line_dash="dash",
+        line_color="green",
+        row=CHART_CONFIG['willr_row'], col=1
+    )
+
+
+def generar_grafico(datos_historicos: pd.DataFrame, resultado_analisis: Dict,
+                   ticker: str, output_dir: str = "salidas"):
     """
     Genera un gráfico interactivo con los datos históricos y los resultados del análisis.
 
     Args:
-        datos_historicos (pd.DataFrame): DataFrame con los datos de precios.
-        resultado_analisis (dict): Diccionario con los resultados del análisis.
-        ticker (str): El ticker de la acción.
+        datos_historicos: DataFrame con los datos de precios e indicadores
+        resultado_analisis: Diccionario con los resultados del análisis
+        ticker: Ticker de la acción
+        output_dir: Directorio de salida para el archivo HTML (por defecto carpeta "salidas")
     """
-    fig = make_subplots(
-        rows=4,
-        cols=1,
-        shared_xaxes=True,
-        vertical_spacing=0.02,
-        subplot_titles=(f'{ticker} Candlestick', 'Volume', 'RSI', 'Williams %R'),
-        row_heights=[0.6, 0.1, 0.15, 0.15]
-    )
+    logger.info(f"Generando gráfico interactivo para {ticker}")
+    logger.debug(f"Directorio de salida: {output_dir}")
+    logger.debug(f"Datos históricos: {len(datos_historicos)} registros")
 
-    # Candlestick
-    fig.add_trace(
-        go.Candlestick(
-            x=datos_historicos['fecha'],
-            open=datos_historicos['apertura'],
-            high=datos_historicos['maximo'],
-            low=datos_historicos['minimo'],
-            close=datos_historicos['cierre'],
-            name='Candlestick'
-        ),
-        row=1, col=1
-    )
+    try:
+        # Crear el directorio de salida si no existe
+        os.makedirs(output_dir, exist_ok=True)
+        logger.debug(f"Directorio de salida verificado/creado: {output_dir}")
 
-    # Moving Averages
-    fig.add_trace(go.Scatter(x=datos_historicos['fecha'], y=datos_historicos['SMA_30'], name='SMA 30', line=dict(color='blue', width=1)), row=1, col=1)
-    fig.add_trace(go.Scatter(x=datos_historicos['fecha'], y=datos_historicos['SMA_60'], name='SMA 60', line=dict(color='orange', width=1)), row=1, col=1)
+        # Crear estructura base
+        fig = _crear_estructura_grafico(ticker)
+        logger.debug("Estructura base del gráfico creada")
 
-    # Volume
-    fig.add_trace(go.Bar(x=datos_historicos['fecha'], y=datos_historicos['volumen'], name='Volume'), row=2, col=1)
+        # Agregar componentes del gráfico
+        _agregar_candlestick(fig, datos_historicos)
+        logger.debug("Candlestick agregado")
 
-    # RSI
-    fig.add_trace(go.Scatter(x=datos_historicos['fecha'], y=datos_historicos['RSI_14'], name='RSI'), row=3, col=1)
-    fig.add_hline(y=70, line_dash="dash", line_color="red", row=3, col=1)
-    fig.add_hline(y=30, line_dash="dash", line_color="green", row=3, col=1)
+        _agregar_medias_moviles(fig, datos_historicos)
+        logger.debug("Medias móviles agregadas")
 
-    # Williams %R
-    fig.add_trace(go.Scatter(x=datos_historicos['fecha'], y=datos_historicos['WILLR_14'], name='Williams %R'), row=4, col=1)
-    fig.add_hline(y=-20, line_dash="dash", line_color="red", row=4, col=1)
-    fig.add_hline(y=-80, line_dash="dash", line_color="green", row=4, col=1)
+        _agregar_volumen(fig, datos_historicos)
+        logger.debug("Volumen agregado")
 
-    fig.update_layout(
-        title_text=f"Análisis Técnico para {ticker}",
-        xaxis_rangeslider_visible=False,
-        height=800
-    )
+        _agregar_rsi(fig, datos_historicos)
+        logger.debug("RSI agregado")
 
-    fig.write_html(f"c:\\Python\\Plataforma_Trading\\salidas\\{ticker}_analisis.html")
+        _agregar_williams_r(fig, datos_historicos)
+        logger.debug("Williams %R agregado")
+
+        # Configurar layout final
+        fig.update_layout(
+            title_text=f"Análisis Técnico para {ticker}",
+            xaxis_rangeslider_visible=False,
+            height=CHART_HEIGHT
+        )
+        logger.debug("Layout del gráfico configurado")
+
+        # Guardar archivo HTML
+        output_path = os.path.join(output_dir, f"{ticker}_analisis.html")
+        fig.write_html(output_path)
+        logger.info(f"Gráfico generado exitosamente: {output_path}")
+
+    except Exception as e:
+        logger.error(f"Error generando gráfico para {ticker}: {e}", exc_info=True)
+        raise
