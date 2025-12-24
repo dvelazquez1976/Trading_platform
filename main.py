@@ -30,6 +30,7 @@ import data_storage
 import indicator_calculator
 import signal_generator
 import visualizer
+import dashboard_generator
 from csv_formatter import modify_csv_format
 from parallel_processor import ParallelProcessor, process_single_ticker
 from config_manager import config_manager
@@ -102,12 +103,13 @@ class TradingPlatform:
         Args:
             analysis_days: Número de días a analizar (por defecto 730 = 2 años)
         """
-        self.fecha_fin = datetime.date.today()
+        # Usamos mañana como fecha de fin porque yfinance excluye el día de fin
+        self.fecha_fin = datetime.date.today() + datetime.timedelta(days=1)
         self.fecha_inicio = self.fecha_fin - datetime.timedelta(days=analysis_days)
 
         logger.info(f"Rango de análisis configurado:")
         logger.info(f"  Fecha inicio: {self.fecha_inicio.strftime('%Y-%m-%d')}")
-        logger.info(f"  Fecha fin: {self.fecha_fin.strftime('%Y-%m-%d')}")
+        logger.info(f"  Fecha fin (exclusiva): {self.fecha_fin.strftime('%Y-%m-%d')}")
         logger.info(f"  Días de análisis: {analysis_days}")
 
     def process_ticker_sequential(self, ticker: str) -> bool:
@@ -405,56 +407,86 @@ class TradingPlatform:
         except IOError as e:
             logger.error(f"Error guardando resultados: {e}")
 
-    def run(self):
-        """Ejecuta el flujo completo de la plataforma."""
+    def _initialize_system(self) -> bool:
+        """Inicializa los componentes básicos del sistema."""
         try:
-            # 1. Inicializar base de datos
             logger.info("Inicializando base de datos...")
             data_storage.crear_base_de_datos()
 
-            # 2. Cargar tickers
             if not self.load_tickers():
-                return
+                return False
 
-            # 3. Configurar rango de fechas
             data_config = config_manager.get_data_config()
             analysis_days = data_config.get('analysis_period_days', 730)
             self.setup_date_range(analysis_days)
+            return True
+        except Exception as e:
+            logger.error(f"Error en inicialización: {e}")
+            return False
 
-            # 4. Determinar modo de procesamiento
-            processing_config = config_manager.get('processing', default={})
-            use_parallel = processing_config.get('parallel_processing', False)
-            max_workers = processing_config.get('max_workers', 4)
+    def _process_data(self):
+        """Gestiona el procesamiento de tickers (secuencial o paralelo)."""
+        processing_config = config_manager.get('processing', default={})
+        use_parallel = processing_config.get('parallel_processing', False)
+        max_workers = processing_config.get('max_workers', 4)
 
-            # 5. Procesar tickers
-            if use_parallel and len(self.tickers) > 1:
-                self.process_all_tickers_parallel(max_workers)
-            else:
-                self.process_all_tickers_sequential()
+        if use_parallel and len(self.tickers) > 1:
+            self.process_all_tickers_parallel(max_workers)
+        else:
+            self.process_all_tickers_sequential()
 
-            # 6. Exportar datos a CSV
-            self.export_csv_data()
+    def _generate_outputs(self):
+        """Genera todos los archivos de salida y reportes."""
+        # 1. Exportar datos a CSV
+        self.export_csv_data()
 
-            # 7. Generar tablas de resumen
-            tablas_content = self.generate_summary_tables()
+        # 2. Generar tablas de resumen
+        tablas_content = self.generate_summary_tables()
 
-            # 8. Guardar resultados
-            self.save_results(tablas_content)
+        # 3. Guardar resultados en texto
+        self.save_results(tablas_content)
 
-            # 9. Resumen final
-            logger.info("\n" + "="*80)
-            logger.info("ANÁLISIS COMPLETADO EXITOSAMENTE")
-            logger.info("="*80)
-            logger.info(f"✓ Tickers procesados: {len(self.ticker_data_collection)}/{len(self.tickers)}")
-            logger.info(f"✓ Mensajes de control: control.txt")
-            logger.info(f"✓ Tablas de resultados: salida.txt")
-            logger.info(f"✓ Archivos CSV: {self.salidas_dir}/")
-            logger.info(f"✓ Gráficos HTML: {self.salidas_dir}/")
-            logger.info("="*80)
+        # 4. Generar dashboard consolidado
+        dashboard_path = dashboard_generator.generar_dashboard_consolidado(
+            self.ticker_data_collection,
+            self.salidas_dir
+        )
+        return dashboard_path
+
+    def run(self):
+        """Ejecuta el flujo completo de la plataforma."""
+        try:
+            if not self._initialize_system():
+                logger.error("Fallo en la inicialización del sistema. Abortando.")
+                return
+
+            self._process_data()
+            
+            if not self.ticker_data_collection:
+                logger.warning("No se procesaron datos. No se generarán salidas.")
+                return
+
+            dashboard_path = self._generate_outputs()
+
+            # Resumen final
+            self._log_final_summary(dashboard_path)
 
         except Exception as e:
             logger.error(f"Error crítico durante la ejecución: {e}", exc_info=True)
             raise
+
+    def _log_final_summary(self, dashboard_path: str):
+        """Muestra el resumen final de la ejecución."""
+        logger.info("\n" + "="*80)
+        logger.info("ANÁLISIS COMPLETADO EXITOSAMENTE")
+        logger.info("="*80)
+        logger.info(f"✓ Tickers procesados: {len(self.ticker_data_collection)}/{len(self.tickers)}")
+        logger.info(f"✓ Mensajes de control: control.txt")
+        logger.info(f"✓ Tablas de resultados: salida.txt")
+        logger.info(f"✓ Archivos CSV: {self.salidas_dir}/")
+        logger.info(f"✓ Gráficos HTML: {self.salidas_dir}/")
+        logger.info(f"✓ Dashboard consolidado: {dashboard_path}")
+        logger.info("="*80)
 
 
 def main():

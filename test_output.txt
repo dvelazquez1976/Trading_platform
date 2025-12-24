@@ -1,7 +1,0 @@
-Configuración cargada desde config.json
-Testing fresh data workflow for TEF.MC
-Descargando datos para TEF.MC desde 2025-09-13 hasta 2025-09-23...
-Descarga exitosa: 6 registros para TEF.MC
-Fresh data latest date: 2025-09-22 00:00:00
-Base de datos creada exitosamente.
-Error de base de datos al guardar TEF.MC: Error binding parameter 2: type 'Timestamp' is not supported

@@ -54,9 +54,8 @@ htmlcov/
 control.txt
 salida.txt
 
-# Output files (opcional - comenta estas líneas si quieres subir los análisis)
-salidas/*.html
-salidas/*.csv
+# Output files
+salidas/
 
 # Certificates and sensitive data
 certs/

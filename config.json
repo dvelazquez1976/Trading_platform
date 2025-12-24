@@ -1,15 +1,32 @@
 {
   "indicators": {
-    "sma_periods": [30, 60, 90],
+    "sma_periods": [
+      30,
+      60,
+      90
+    ],
     "rsi_period": 14,
-    "stoch_params": {"k": 14, "d": 3},
-    "macd_params": {"fast": 12, "slow": 26, "signal": 9},
-    "bollinger_params": {"length": 20, "std": 2},
+    "stoch_params": {
+      "k": 14,
+      "d": 3
+    },
+    "macd_params": {
+      "fast": 12,
+      "slow": 26,
+      "signal": 9
+    },
+    "bollinger_params": {
+      "length": 20,
+      "std": 2
+    },
     "cci_period": 20,
     "adx_period": 14,
     "mfi_period": 14,
     "willr_period": 14,
-    "ao_params": {"fast": 5, "slow": 34},
+    "ao_params": {
+      "fast": 5,
+      "slow": 34
+    },
     "roc_period": 12
   },
   "signals": {

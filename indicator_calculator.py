@@ -8,102 +8,116 @@ from logger_config import get_logger
 
 logger = get_logger(__name__)
 
-def calcular_indicadores(datos):
+def calcular_indicadores(datos: pd.DataFrame) -> pd.DataFrame:
     """
     Calcula una serie de indicadores técnicos y los añade al DataFrame.
+    
+    El proceso incluye:
+    1. Validación de columnas requeridas.
+    2. Conversión de nombres de columnas al inglés (para compatibilidad con pandas_ta).
+    3. Cálculo de indicadores de tendencia (SMA, MACD, ADX).
+    4. Cálculo de indicadores de momentum (RSI, Stoch, CCI, Williams %R, AO, ROC).
+    5. Cálculo de indicadores de volatilidad (Bollinger Bands).
+    6. Cálculo de indicadores de volumen (MFI).
+    7. Cálculo de indicadores avanzados (opcional).
+    8. Reconversión de nombres al español.
 
     Args:
-        datos (pd.DataFrame): DataFrame con los datos de precios.
+        datos (pd.DataFrame): DataFrame con columnas [fecha, apertura, maximo, minimo, cierre, volumen].
 
     Returns:
-        pd.DataFrame: DataFrame con los indicadores calculados.
+        pd.DataFrame: DataFrame original enriquecido con columnas de indicadores.
     """
     logger.info(f"Iniciando cálculo de indicadores técnicos para {len(datos)} registros")
 
     # Validar columnas requeridas
     validate_required_columns(datos, STANDARD_COLUMNS['SPANISH'])
-    logger.debug("Validación de columnas completada")
-
+    
     # Crear copia y renombrar columnas para compatibilidad con pandas_ta
     df_ta = rename_columns_to_english(datos)
 
     # Obtener parámetros de configuración
     params = config_manager.get_indicator_params()
-    logger.debug(f"Parámetros de configuración cargados: {list(params.keys())}")
 
-    # Calcular indicadores directamente
-    logger.debug("Calculando indicadores básicos...")
+    # --- 1. INDICADORES DE TENDENCIA ---
+    _calcular_tendencia(df_ta, params)
 
-    # SMAs
-    sma_periods = params.get('sma_periods', [30, 60, 90])
-    for period in sma_periods:
-        df_ta[f'SMA_{period}'] = ta.sma(df_ta['close'], length=period)
-    logger.debug(f"SMAs calculadas para períodos: {sma_periods}")
+    # --- 2. INDICADORES DE MOMENTUM ---
+    _calcular_momentum(df_ta, params)
 
-    # RSI
-    df_ta['RSI'] = ta.rsi(df_ta['close'], length=params.get('rsi_period', 14))
-    logger.debug("RSI calculado")
+    # --- 3. INDICADORES DE VOLATILIDAD ---
+    _calcular_volatilidad(df_ta, params)
 
-    # Stochastic
-    stoch_params = params.get('stoch_params', {"k": 14, "d": 3})
-    stoch = ta.stoch(df_ta['high'], df_ta['low'], df_ta['close'], **stoch_params)
-    if stoch is not None:
-        df_ta = pd.concat([df_ta, stoch], axis=1)
-        logger.debug(f"Stochastic calculado (k={stoch_params['k']}, d={stoch_params['d']})")
+    # --- 4. INDICADORES DE VOLUMEN ---
+    _calcular_volumen_ind(df_ta, params)
 
-    # MACD
-    macd_params = params.get('macd_params', {"fast": 12, "slow": 26, "signal": 9})
-    macd = ta.macd(df_ta['close'], **macd_params)
-    if macd is not None:
-        df_ta = pd.concat([df_ta, macd], axis=1)
-        logger.debug(f"MACD calculado ({macd_params['fast']}, {macd_params['slow']}, {macd_params['signal']})")
-
-    # Bollinger Bands
-    bb_params = params.get('bollinger_params', {"length": 20, "std": 2})
-    bb = ta.bbands(df_ta['close'], **bb_params)
-    if bb is not None:
-        df_ta = pd.concat([df_ta, bb], axis=1)
-        logger.debug(f"Bandas de Bollinger calculadas (length={bb_params['length']}, std={bb_params['std']})")
-
-    # CCI
-    df_ta['CCI'] = ta.cci(df_ta['high'], df_ta['low'], df_ta['close'], length=params.get('cci_period', 20))
-    logger.debug("CCI calculado")
-
-    # ADX
-    adx = ta.adx(df_ta['high'], df_ta['low'], df_ta['close'], length=params.get('adx_period', 14))
-    if adx is not None:
-        df_ta = pd.concat([df_ta, adx], axis=1)
-        logger.debug("ADX calculado")
-
-    # MFI
-    df_ta['MFI'] = ta.mfi(df_ta['high'], df_ta['low'], df_ta['close'], df_ta['volume'], length=params.get('mfi_period', 14))
-    logger.debug("MFI calculado")
-
-    # Williams %R
-    df_ta['WILLR'] = ta.willr(df_ta['high'], df_ta['low'], df_ta['close'], length=params.get('willr_period', 14))
-    logger.debug("Williams %R calculado")
-
-    # Awesome Oscillator
-    ao_params = params.get('ao_params', {"fast": 5, "slow": 34})
-    df_ta['AO'] = ta.ao(df_ta['high'], df_ta['low'], **ao_params)
-    logger.debug("Awesome Oscillator calculado")
-
-    # Rate of Change
-    df_ta['ROC'] = ta.roc(df_ta['close'], length=params.get('roc_period', 12))
-    logger.debug("ROC calculado")
-
-    # Calcular indicadores avanzados si están habilitados
+    # --- 5. INDICADORES AVANZADOS (Opcional) ---
     advanced_config = config_manager.get('advanced_indicators', default={})
     if advanced_config.get('enabled', False):
-        logger.info("Indicadores avanzados habilitados - iniciando cálculo...")
+        logger.info("Calculando indicadores avanzados...")
         df_ta = calculate_all_advanced_indicators(df_ta)
-        logger.info("Indicadores avanzados calculados exitosamente")
 
     # Renombrar columnas de vuelta al español
     df_ta = rename_columns_to_spanish(df_ta)
-    logger.debug("Columnas renombradas de vuelta al español")
-
+    
     total_indicators = len(df_ta.columns) - len(STANDARD_COLUMNS['SPANISH'])
-    logger.info(f"Cálculo de indicadores completado: {total_indicators} indicadores añadidos")
+    logger.info(f"Cálculo completado: {total_indicators} indicadores añadidos")
 
     return df_ta
+
+def _calcular_tendencia(df: pd.DataFrame, params: dict):
+    """Calcula indicadores de tendencia: SMA, MACD, ADX."""
+    # SMAs
+    sma_periods = params.get('sma_periods', [30, 60, 90])
+    for period in sma_periods:
+        df[f'SMA_{period}'] = ta.sma(df['close'], length=period)
+    
+    # MACD
+    macd_params = params.get('macd_params', {"fast": 12, "slow": 26, "signal": 9})
+    macd = ta.macd(df['close'], **macd_params)
+    if macd is not None:
+        for col in macd.columns:
+            df[col] = macd[col]
+
+    # ADX
+    adx = ta.adx(df['high'], df['low'], df['close'], length=params.get('adx_period', 14))
+    if adx is not None:
+        for col in adx.columns:
+            df[col] = adx[col]
+
+def _calcular_momentum(df: pd.DataFrame, params: dict):
+    """Calcula indicadores de momentum: RSI, Stochastic, CCI, Williams %R, AO, ROC."""
+    # RSI
+    df['RSI'] = ta.rsi(df['close'], length=params.get('rsi_period', 14))
+
+    # Stochastic
+    stoch_params = params.get('stoch_params', {"k": 14, "d": 3})
+    stoch = ta.stoch(df['high'], df['low'], df['close'], **stoch_params)
+    if stoch is not None:
+        for col in stoch.columns:
+            df[col] = stoch[col]
+
+    # CCI
+    df['CCI'] = ta.cci(df['high'], df['low'], df['close'], length=params.get('cci_period', 20))
+
+    # Williams %R
+    df['WILLR'] = ta.willr(df['high'], df['low'], df['close'], length=params.get('willr_period', 14))
+
+    # Awesome Oscillator
+    ao_params = params.get('ao_params', {"fast": 5, "slow": 34})
+    df['AO'] = ta.ao(df['high'], df['low'], **ao_params)
+
+    # Rate of Change
+    df['ROC'] = ta.roc(df['close'], length=params.get('roc_period', 12))
+
+def _calcular_volatilidad(df: pd.DataFrame, params: dict):
+    """Calcula indicadores de volatilidad: Bollinger Bands."""
+    bb_params = params.get('bollinger_params', {"length": 20, "std": 2})
+    bb = ta.bbands(df['close'], **bb_params)
+    if bb is not None:
+        for col in bb.columns:
+            df[col] = bb[col]
+
+def _calcular_volumen_ind(df: pd.DataFrame, params: dict):
+    """Calcula indicadores de volumen: MFI."""
+    df['MFI'] = ta.mfi(df['high'], df['low'], df['close'], df['volume'], length=params.get('mfi_period', 14))
