@@ -26,9 +26,9 @@ def calculate_stochastic_rsi(df: pd.DataFrame, rsi_period: int = 14, stoch_perio
     # Aplicar Estocástico al RSI
     stoch_rsi = ta.stoch(high=rsi, low=rsi, close=rsi, k=stoch_period)
 
-    # Añadir al DataFrame
-    result_df[f'STOCHRSI_K_{rsi_period}_{stoch_period}'] = stoch_rsi[f'STOCHk_{stoch_period}_3_3']
-    result_df[f'STOCHRSI_D_{rsi_period}_{stoch_period}'] = stoch_rsi[f'STOCHd_{stoch_period}_3_3']
+    # Añadir al DataFrame con nombres estándar
+    result_df['STOCHRSI_K'] = stoch_rsi.iloc[:, 0]
+    result_df['STOCHRSI_D'] = stoch_rsi.iloc[:, 1]
 
     return result_df
 
@@ -61,7 +61,7 @@ def calculate_tsi(df: pd.DataFrame, long_period: int = 25, short_period: int = 1
     # Calcular TSI
     tsi = 100 * (double_smooth / double_smooth_abs)
 
-    result_df[f'TSI_{long_period}_{short_period}'] = tsi
+    result_df['TSI'] = tsi
 
     return result_df
 
@@ -84,7 +84,7 @@ def calculate_ultimate_oscillator(df: pd.DataFrame, period1: int = 7, period2: i
     uo = ta.uo(high=df['high'], low=df['low'], close=df['close'],
                fast=period1, medium=period2, slow=period3)
 
-    result_df[f'UO_{period1}_{period2}_{period3}'] = uo
+    result_df['UO'] = uo
 
     return result_df
 
@@ -112,7 +112,7 @@ def calculate_chaikin_oscillator(df: pd.DataFrame, fast_period: int = 3, slow_pe
     # Chaikin Oscillator = Fast EMA - Slow EMA
     chaikin_osc = fast_ema - slow_ema
 
-    result_df[f'CHAIKIN_OSC_{fast_period}_{slow_period}'] = chaikin_osc
+    result_df['CHAIKIN_OSC'] = chaikin_osc
 
     return result_df
 
@@ -133,9 +133,7 @@ def calculate_aroon_oscillator(df: pd.DataFrame, period: int = 14) -> pd.DataFra
     aroon = ta.aroon(high=df['high'], low=df['low'], length=period)
 
     # Aroon Oscillator = Aroon Up - Aroon Down
-    result_df[f'AROONU_{period}'] = aroon[f'AROONU_{period}']
-    result_df[f'AROOND_{period}'] = aroon[f'AROOND_{period}']
-    result_df[f'AROONOSC_{period}'] = aroon[f'AROONU_{period}'] - aroon[f'AROOND_{period}']
+    result_df['AROONOSC'] = aroon.iloc[:, 0] - aroon.iloc[:, 1]
 
     return result_df
 
@@ -155,7 +153,10 @@ def calculate_trix(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
     # TRIX está disponible en pandas_ta
     trix = ta.trix(close=df['close'], length=period)
 
-    result_df[f'TRIX_{period}'] = trix
+    if isinstance(trix, pd.DataFrame):
+        result_df['TRIX'] = trix.iloc[:, 0]
+    else:
+        result_df['TRIX'] = trix
 
     return result_df
 
@@ -175,7 +176,7 @@ def calculate_volume_rsi(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
     # Aplicar RSI al volumen
     volume_rsi = ta.rsi(df['volume'], length=period)
 
-    result_df[f'VOLRSI_{period}'] = volume_rsi
+    result_df['VOLRSI'] = volume_rsi
 
     return result_df
 
@@ -197,7 +198,7 @@ def calculate_dpo(df: pd.DataFrame, period: int = 20) -> pd.DataFrame:
     shift_periods = (period // 2) + 1
     dpo = df['close'] - sma.shift(shift_periods)
 
-    result_df[f'DPO_{period}'] = dpo
+    result_df['DPO'] = dpo
 
     return result_df
 
@@ -262,8 +263,6 @@ def calculate_all_advanced_indicators(df: pd.DataFrame) -> pd.DataFrame:
             result_df,
             period=advanced_config.get('dpo_period', 20)
         )
-
-        print("Indicadores avanzados calculados exitosamente.")
 
     except Exception as e:
         print(f"Error calculando indicadores avanzados: {e}")

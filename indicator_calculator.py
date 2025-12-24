@@ -76,14 +76,18 @@ def _calcular_tendencia(df: pd.DataFrame, params: dict):
     macd_params = params.get('macd_params', {"fast": 12, "slow": 26, "signal": 9})
     macd = ta.macd(df['close'], **macd_params)
     if macd is not None:
-        for col in macd.columns:
-            df[col] = macd[col]
+        # Standardize names: MACD, MACDh (histogram), MACDs (signal)
+        df['MACD'] = macd.iloc[:, 0]
+        df['MACDh'] = macd.iloc[:, 1]
+        df['MACDs'] = macd.iloc[:, 2]
 
     # ADX
     adx = ta.adx(df['high'], df['low'], df['close'], length=params.get('adx_period', 14))
     if adx is not None:
-        for col in adx.columns:
-            df[col] = adx[col]
+        # Standardize names: ADX, DMP (+DI), DMN (-DI)
+        df['ADX'] = adx.iloc[:, 0]
+        df['DMP'] = adx.iloc[:, 2]
+        df['DMN'] = adx.iloc[:, 3]
 
 def _calcular_momentum(df: pd.DataFrame, params: dict):
     """Calcula indicadores de momentum: RSI, Stochastic, CCI, Williams %R, AO, ROC."""
@@ -94,8 +98,9 @@ def _calcular_momentum(df: pd.DataFrame, params: dict):
     stoch_params = params.get('stoch_params', {"k": 14, "d": 3})
     stoch = ta.stoch(df['high'], df['low'], df['close'], **stoch_params)
     if stoch is not None:
-        for col in stoch.columns:
-            df[col] = stoch[col]
+        # Standardize names: STOCHk, STOCHd
+        df['STOCHk'] = stoch.iloc[:, 0]
+        df['STOCHd'] = stoch.iloc[:, 1]
 
     # CCI
     df['CCI'] = ta.cci(df['high'], df['low'], df['close'], length=params.get('cci_period', 20))
@@ -115,8 +120,10 @@ def _calcular_volatilidad(df: pd.DataFrame, params: dict):
     bb_params = params.get('bollinger_params', {"length": 20, "std": 2})
     bb = ta.bbands(df['close'], **bb_params)
     if bb is not None:
-        for col in bb.columns:
-            df[col] = bb[col]
+        # Standardize names: BBL (lower), BBM (middle), BBU (upper)
+        df['BBL_BB'] = bb.iloc[:, 0]
+        df['BBM_BB'] = bb.iloc[:, 1]
+        df['BBU_BB'] = bb.iloc[:, 2]
 
 def _calcular_volumen_ind(df: pd.DataFrame, params: dict):
     """Calcula indicadores de volumen: MFI."""

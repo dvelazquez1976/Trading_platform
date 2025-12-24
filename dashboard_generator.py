@@ -41,7 +41,7 @@ def generar_dashboard_consolidado(ticker_data_collection: List[Dict], output_dir
             'senales': resultado['señales'],
             'rsi': datos.iloc[-1]['RSI'],
             'willr': datos.iloc[-1]['WILLR'],
-            'macd': datos.iloc[-1]['MACD_12_26_9'],
+            'macd': datos.iloc[-1]['MACD'],
             'volumen': datos.iloc[-1]['volumen'],
             'volatilidad': volatilidad
         }

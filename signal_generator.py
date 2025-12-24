@@ -124,18 +124,18 @@ def generar_senales(datos: pd.DataFrame) -> Dict:
     stoch_overbought = thresholds.get('stoch_overbought', 80)
 
     # Cruce en zona de sobreventa
-    if (ultimo_dato['STOCHk_14_3_3'] < stoch_oversold and
-        ultimo_dato['STOCHd_14_3_3'] < stoch_oversold):
+    if (ultimo_dato['STOCHk'] < stoch_oversold and
+        ultimo_dato['STOCHd'] < stoch_oversold):
         senales["Estocastico"] = _evaluar_cruce(
-            ultimo_dato['STOCHk_14_3_3'], ultimo_dato['STOCHd_14_3_3'],
-            dato_anterior['STOCHk_14_3_3'], dato_anterior['STOCHd_14_3_3']
+            ultimo_dato['STOCHk'], ultimo_dato['STOCHd'],
+            dato_anterior['STOCHk'], dato_anterior['STOCHd']
         )
     # Cruce en zona de sobrecompra
-    elif (ultimo_dato['STOCHk_14_3_3'] > stoch_overbought and
-          ultimo_dato['STOCHd_14_3_3'] > stoch_overbought):
+    elif (ultimo_dato['STOCHk'] > stoch_overbought and
+          ultimo_dato['STOCHd'] > stoch_overbought):
         cruce = _evaluar_cruce(
-            ultimo_dato['STOCHk_14_3_3'], ultimo_dato['STOCHd_14_3_3'],
-            dato_anterior['STOCHk_14_3_3'], dato_anterior['STOCHd_14_3_3']
+            ultimo_dato['STOCHk'], ultimo_dato['STOCHd'],
+            dato_anterior['STOCHk'], dato_anterior['STOCHd']
         )
         # Invertir señal en zona de sobrecompra
         if cruce == SIGNAL_BUY:
@@ -145,14 +145,14 @@ def generar_senales(datos: pd.DataFrame) -> Dict:
 
     # 4. MACD
     senales["MACD"] = _evaluar_cruce(
-        ultimo_dato['MACD_12_26_9'], ultimo_dato['MACDs_12_26_9'],
-        dato_anterior['MACD_12_26_9'], dato_anterior['MACDs_12_26_9']
+        ultimo_dato['MACD'], ultimo_dato['MACDs'],
+        dato_anterior['MACD'], dato_anterior['MACDs']
     )
 
     # 5. Bandas de Bollinger
-    if ultimo_dato['cierre'] < ultimo_dato['BBL_20_2.0_2.0']:
+    if ultimo_dato['cierre'] < ultimo_dato['BBL_BB']:
         senales["Bandas_Bollinger"] = SIGNAL_BUY
-    elif ultimo_dato['cierre'] > ultimo_dato['BBU_20_2.0_2.0']:
+    elif ultimo_dato['cierre'] > ultimo_dato['BBU_BB']:
         senales["Bandas_Bollinger"] = SIGNAL_SELL
 
     # 6. Williams %R

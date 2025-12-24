@@ -52,9 +52,9 @@ ADVANCED_INDICATORS = [
 
 # Columnas de indicadores en la tabla de resultados
 INDICATOR_RESULT_COLUMNS = [
-    "SMA_30", "RSI_14", "STOCHk_14_3_3", "MACD_12_26_9",
-    "BBM_20_2", "CCI_20", "ADX_14", "MFI_14",
-    "WILLR_14", "AO_5_34", "ROC_12"
+    "SMA_30", "RSI", "STOCHk", "MACD",
+    "BBM_BB", "CCI", "ADX", "MFI",
+    "WILLR", "AO", "ROC"
 ]
 
 # Columnas de indicadores avanzados

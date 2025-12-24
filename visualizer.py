@@ -103,10 +103,10 @@ def _agregar_medias_moviles(fig: go.Figure, datos: pd.DataFrame):
     )
 
     # Bollinger Bands
-    if 'BBU_20_2.0' in datos.columns:
+    if 'BBU_BB' in datos.columns:
         fig.add_trace(
             go.Scatter(
-                x=datos['fecha'], y=datos['BBU_20_2.0'],
+                x=datos['fecha'], y=datos['BBU_BB'],
                 name='Banda Superior',
                 line=dict(color='rgba(148, 163, 184, 0.3)', width=1),
                 showlegend=False
@@ -115,7 +115,7 @@ def _agregar_medias_moviles(fig: go.Figure, datos: pd.DataFrame):
         )
         fig.add_trace(
             go.Scatter(
-                x=datos['fecha'], y=datos['BBL_20_2.0'],
+                x=datos['fecha'], y=datos['BBL_BB'],
                 name='Banda Inferior',
                 line=dict(color='rgba(148, 163, 184, 0.3)', width=1),
                 fill='tonexty',
@@ -144,14 +144,14 @@ def _agregar_volumen(fig: go.Figure, datos: pd.DataFrame):
 
 def _agregar_macd(fig: go.Figure, datos: pd.DataFrame):
     """Agrega indicador MACD."""
-    if 'MACD_12_26_9' in datos.columns:
+    if 'MACD' in datos.columns:
         # Histograma
         colors = [COLORS['buy'] if val >= 0 else COLORS['sell'] 
-                  for val in datos['MACDh_12_26_9']]
+                  for val in datos['MACDh']]
         
         fig.add_trace(
             go.Bar(
-                x=datos['fecha'], y=datos['MACDh_12_26_9'],
+                x=datos['fecha'], y=datos['MACDh'],
                 name='Histograma',
                 marker_color=colors,
                 showlegend=False
@@ -162,7 +162,7 @@ def _agregar_macd(fig: go.Figure, datos: pd.DataFrame):
         # Línea MACD
         fig.add_trace(
             go.Scatter(
-                x=datos['fecha'], y=datos['MACD_12_26_9'],
+                x=datos['fecha'], y=datos['MACD'],
                 name='MACD',
                 line=dict(color=COLORS['accent'], width=1.5)
             ),
@@ -172,7 +172,7 @@ def _agregar_macd(fig: go.Figure, datos: pd.DataFrame):
         # Línea de Señal
         fig.add_trace(
             go.Scatter(
-                x=datos['fecha'], y=datos['MACDs_12_26_9'],
+                x=datos['fecha'], y=datos['MACDs'],
                 name='Señal',
                 line=dict(color='#f43f5e', width=1.5) # Rose 500
             ),
@@ -274,7 +274,7 @@ def _generar_html_tabla(datos: pd.DataFrame, resultado_analisis: Dict, ticker: s
             <td>{row['volumen']:,.0f}</td>
             <td>{row['RSI']:.2f}</td>
             <td>{row['WILLR']:.2f}</td>
-            <td>{row['MACD_12_26_9']:.4f}</td>
+            <td>{row['MACD']:.4f}</td>
         </tr>
         """
 
