@@ -42,7 +42,14 @@ class TradingLogger:
         fh.setFormatter(file_fmt)
         self.logger.addHandler(fh)
 
-        ch = logging.StreamHandler(sys.stdout)
+        # Forzar UTF-8 en stdout para evitar UnicodeEncodeError en terminales Windows (cp1252)
+        try:
+            if hasattr(sys.stdout, 'reconfigure'):
+                sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+            stream = sys.stdout
+        except Exception:
+            stream = sys.stdout
+        ch = logging.StreamHandler(stream)
         ch.setLevel(logging.INFO)
         ch.setFormatter(console_fmt)
         self.logger.addHandler(ch)
