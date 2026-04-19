@@ -5,10 +5,13 @@ import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import streamlit as st
+from components.theme import apply_theme
 
 st.set_page_config(page_title="Configuración", page_icon="⚙️", layout="wide")
+apply_theme()
 
 CONFIG_FILE = Path(__file__).parent.parent.parent / "config" / "config.json"
 
@@ -89,8 +92,17 @@ with tab_ui:
     st.subheader("Interfaz")
     ui_cfg = cfg.get("ui", {})
 
-    theme = st.selectbox("Tema de gráficos", ["light", "dark"],
-                          index=["light", "dark"].index(ui_cfg.get("theme", "light")))
+    current_theme = ui_cfg.get("theme", "light")
+    theme = st.radio(
+        "Tema de la aplicación",
+        ["light", "dark"],
+        index=0 if current_theme == "light" else 1,
+        horizontal=True,
+        format_func=lambda t: "☀️ Claro" if t == "light" else "🌙 Oscuro",
+    )
+    if theme != current_theme:
+        st.info("Guarda la configuración para aplicar el tema (la página se actualizará).")
+
     chart_months = st.slider("Meses de histórico en gráficos", 3, 60, ui_cfg.get("chart_months", 24))
 
     default_market = st.selectbox(
@@ -110,6 +122,7 @@ with tab_ui:
 st.markdown("---")
 if st.button("💾 Guardar configuración", type="primary"):
     _save_config(cfg)
+    st.rerun()
 
 with st.expander("Ver configuración actual (JSON)"):
     st.json(cfg)

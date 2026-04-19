@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import streamlit as st
 import pandas as pd
@@ -11,7 +12,10 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Backtesting", page_icon="🔬", layout="wide")
 
+from components.theme import apply_theme, export_csv_es
 from trading_platform.providers import descargar_datos
+
+apply_theme()
 from trading_platform.indicators.basic import calcular_indicadores
 from trading_platform.backtesting.engine import BacktestingEngine
 from trading_platform.backtesting.costs import TransactionCosts
@@ -100,6 +104,14 @@ if "bt_result" in st.session_state:
 
     st.markdown("---")
 
+    import json as _json
+    _cfg_path = Path(__file__).parent.parent.parent / "config" / "config.json"
+    try:
+        _theme = _json.loads(_cfg_path.read_text(encoding="utf-8")).get("ui", {}).get("theme", "light")
+    except Exception:
+        _theme = "light"
+    plotly_template = "plotly_dark" if _theme == "dark" else "plotly_white"
+
     if equity:
         fig = go.Figure()
         eq_df = pd.DataFrame(equity)
@@ -112,7 +124,7 @@ if "bt_result" in st.session_state:
         fig.update_layout(
             title="Curva de capital",
             xaxis_title="Fecha", yaxis_title="Capital (€)",
-            template="plotly_white", height=350,
+            template=plotly_template, height=350,
             margin=dict(t=50, b=30, l=50, r=20),
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -120,7 +132,17 @@ if "bt_result" in st.session_state:
     if trades:
         st.subheader(f"Operaciones ({len(trades)} totales)")
         df_trades = pd.DataFrame(trades)
-        df_trades["retorno_%"] = df_trades.get("return_pct", 0) * 100
+        if "return_pct" in df_trades.columns:
+            df_trades["retorno_%"] = df_trades["return_pct"] * 100
+        tc1, tc2 = st.columns([1, 5])
+        with tc1:
+            st.download_button(
+                "⬇ Exportar CSV",
+                data=export_csv_es(df_trades),
+                file_name=f"trades_{ticker_label}.csv",
+                mime="text/csv",
+                help="Formato europeo (';' separador, ',' decimal)",
+            )
         st.dataframe(df_trades, use_container_width=True, height=300)
     else:
         st.info("La estrategia no generó operaciones en el período seleccionado.")
