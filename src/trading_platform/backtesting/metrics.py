@@ -32,7 +32,7 @@ def calculate_metrics(trades: list, initial_capital: float, total_days: int) -> 
     # Sortino
     if len(pnl) > 1:
         neg_returns = [r for r in [p / initial_capital for p in pnl] if r < 0]
-        downside_std = np.std(neg_returns) if neg_returns else 1e-9
+        downside_std = np.std(neg_returns) if len(neg_returns) > 1 else 1e-9
         sortino = (np.mean([p / initial_capital for p in pnl]) / downside_std) * np.sqrt(252)
     else:
         sortino = 0.0
