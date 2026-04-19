@@ -4,11 +4,16 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Watchlist", page_icon="📋", layout="wide")
+
+from components.theme import apply_theme, export_csv_es
+
+apply_theme()
 
 MARKETS_DIR = Path(__file__).parent.parent.parent / "data" / "markets"
 WATCHLISTS_DIR = Path(__file__).parent.parent.parent / "data" / "watchlists"
@@ -137,7 +142,7 @@ with col_right:
             height=400,
         )
 
-        btn_col1, btn_col2, btn_col3 = st.columns(3)
+        btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
         with btn_col1:
             if st.button("🗑 Eliminar selección"):
                 to_remove = edited_watch[edited_watch["🗑"] == True]["ticker"].tolist()
@@ -152,6 +157,15 @@ with col_right:
             if st.button("🧹 Vaciar watchlist"):
                 st.session_state["watchlist"] = []
                 st.rerun()
+        with btn_col4:
+            csv_bytes = export_csv_es(df_watch.drop(columns=["🗑"]))
+            st.download_button(
+                "⬇ Exportar CSV",
+                data=csv_bytes,
+                file_name="watchlist.csv",
+                mime="text/csv",
+                help="Formato europeo (';' separador, ',' decimal)",
+            )
 
     st.markdown("---")
     tickers_en_watchlist = [r["ticker"] for r in st.session_state.get("watchlist", [])]
