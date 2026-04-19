@@ -5,10 +5,13 @@ import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import streamlit as st
+from components.theme import apply_theme
 
 st.set_page_config(page_title="Configuración", page_icon="⚙️", layout="wide")
+apply_theme()
 
 CONFIG_FILE = Path(__file__).parent.parent.parent / "config" / "config.json"
 
@@ -30,7 +33,7 @@ def _save_config(cfg: dict):
 st.title("⚙️ Configuración")
 cfg = _load_config()
 
-tab_data, tab_proc, tab_prov, tab_ui = st.tabs(["Datos", "Procesamiento", "Proveedores", "Interfaz"])
+tab_data, tab_proc, tab_prov, tab_ui, tab_alerts = st.tabs(["Datos", "Procesamiento", "Proveedores", "Interfaz", "Alertas"])
 
 with tab_data:
     st.subheader("Datos históricos")
@@ -80,17 +83,41 @@ with tab_prov:
     st.caption("Las claves se guardan en config.json. Para mayor seguridad usa variables de entorno (.env).")
 
     api_keys = prov_cfg.get("api_keys", {})
-    av_key = st.text_input("Alpha Vantage API Key", value=api_keys.get("alpha_vantage", ""),
-                            type="password", placeholder="Tu clave aquí")
-    if av_key:
-        cfg["providers"]["api_keys"]["alpha_vantage"] = av_key
+    cfg["providers"].setdefault("api_keys", {})
+
+    st.markdown("Los proveedores de pago se activan implementando su clase en `providers/_stubs.py`.")
+
+    _providers_info = {
+        "fmp":      ("Financial Modeling Prep", "https://financialmodelingprep.com", "~22 USD/mes — fundamentales históricos, ratings, dividendos"),
+        "eodhd":    ("EOD Historical Data",     "https://eodhd.com",                 "~20 USD/mes — OHLCV 70+ mercados, dividendos precisos"),
+        "polygon":  ("Polygon.io",              "https://polygon.io",                "~29 USD/mes — real-time US, opciones, cripto"),
+        "finnhub":  ("Finnhub",                 "https://finnhub.io",                "Free tier US / pago para EU — earnings, news, sentimiento"),
+    }
+    for key, (label, _url, note) in _providers_info.items():
+        col_k, col_v = st.columns([2, 3])
+        with col_k:
+            st.caption(f"**{label}**")
+            st.caption(note)
+        with col_v:
+            val = st.text_input(f"{label} API Key", value=api_keys.get(key, ""),
+                                type="password", placeholder="Vacío = no activo", key=f"key_{key}")
+            cfg["providers"]["api_keys"][key] = val
 
 with tab_ui:
     st.subheader("Interfaz")
     ui_cfg = cfg.get("ui", {})
 
-    theme = st.selectbox("Tema de gráficos", ["light", "dark"],
-                          index=["light", "dark"].index(ui_cfg.get("theme", "light")))
+    current_theme = ui_cfg.get("theme", "light")
+    theme = st.radio(
+        "Tema de la aplicación",
+        ["light", "dark"],
+        index=0 if current_theme == "light" else 1,
+        horizontal=True,
+        format_func=lambda t: "☀️ Claro" if t == "light" else "🌙 Oscuro",
+    )
+    if theme != current_theme:
+        st.info("Guarda la configuración para aplicar el tema (la página se actualizará).")
+
     chart_months = st.slider("Meses de histórico en gráficos", 3, 60, ui_cfg.get("chart_months", 24))
 
     default_market = st.selectbox(
@@ -107,9 +134,63 @@ with tab_ui:
     cfg["ui"]["chart_months"] = chart_months
     cfg["ui"]["default_market"] = default_market
 
+with tab_alerts:
+    st.subheader("Alertas via Telegram")
+    st.info(
+        "Recibe un mensaje en Telegram cuando se detecten señales de **COMPRA** o **VENTA**.\n\n"
+        "**Cómo configurarlo:**\n"
+        "1. Habla con [@BotFather](https://t.me/BotFather) en Telegram → `/newbot` → copia el token.\n"
+        "2. Habla con [@userinfobot](https://t.me/userinfobot) para obtener tu chat_id.\n"
+        "3. Pega ambos valores aquí y guarda."
+    )
+
+    alerts_cfg = cfg.get("alerts", {})
+
+    alerts_enabled = st.checkbox(
+        "Alertas habilitadas",
+        value=alerts_cfg.get("enabled", False),
+    )
+    tg_token = st.text_input(
+        "Token del bot de Telegram",
+        value=alerts_cfg.get("telegram_token", ""),
+        type="password",
+        placeholder="123456:ABC-DEFghijkl...",
+    )
+    tg_chat_id = st.text_input(
+        "Chat ID destino",
+        value=alerts_cfg.get("telegram_chat_id", ""),
+        placeholder="987654321 o -1001234567890",
+    )
+    alert_mode = st.radio(
+        "Enviar alertas de",
+        ["both", "buy", "sell"],
+        index=["both", "buy", "sell"].index(alerts_cfg.get("mode", "both")),
+        horizontal=True,
+        format_func=lambda m: {"both": "Compra y Venta", "buy": "Solo Compra", "sell": "Solo Venta"}[m],
+    )
+
+    cfg.setdefault("alerts", {})
+    cfg["alerts"]["enabled"] = alerts_enabled
+    cfg["alerts"]["telegram_token"] = tg_token
+    cfg["alerts"]["telegram_chat_id"] = tg_chat_id
+    cfg["alerts"]["mode"] = alert_mode
+
+    if st.button("🔔 Enviar mensaje de prueba"):
+        if tg_token and tg_chat_id:
+            from trading_platform.alerts.telegram import TelegramAlerter
+            alerter = TelegramAlerter(bot_token=tg_token, chat_id=tg_chat_id)
+            ok, msg = alerter.test_connection()
+            if ok:
+                st.success(msg)
+            else:
+                st.error(msg)
+        else:
+            st.warning("Introduce el token y el chat_id antes de hacer la prueba.")
+
 st.markdown("---")
 if st.button("💾 Guardar configuración", type="primary"):
     _save_config(cfg)
+    st.rerun()
 
 with st.expander("Ver configuración actual (JSON)"):
     st.json(cfg)
