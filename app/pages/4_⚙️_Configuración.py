@@ -33,7 +33,7 @@ def _save_config(cfg: dict):
 st.title("⚙️ Configuración")
 cfg = _load_config()
 
-tab_data, tab_proc, tab_prov, tab_ui = st.tabs(["Datos", "Procesamiento", "Proveedores", "Interfaz"])
+tab_data, tab_proc, tab_prov, tab_ui, tab_alerts = st.tabs(["Datos", "Procesamiento", "Proveedores", "Interfaz", "Alertas"])
 
 with tab_data:
     st.subheader("Datos históricos")
@@ -118,6 +118,59 @@ with tab_ui:
     cfg["ui"]["theme"] = theme
     cfg["ui"]["chart_months"] = chart_months
     cfg["ui"]["default_market"] = default_market
+
+with tab_alerts:
+    st.subheader("Alertas via Telegram")
+    st.info(
+        "Recibe un mensaje en Telegram cuando se detecten señales de **COMPRA** o **VENTA**.\n\n"
+        "**Cómo configurarlo:**\n"
+        "1. Habla con [@BotFather](https://t.me/BotFather) en Telegram → `/newbot` → copia el token.\n"
+        "2. Habla con [@userinfobot](https://t.me/userinfobot) para obtener tu chat_id.\n"
+        "3. Pega ambos valores aquí y guarda."
+    )
+
+    alerts_cfg = cfg.get("alerts", {})
+
+    alerts_enabled = st.checkbox(
+        "Alertas habilitadas",
+        value=alerts_cfg.get("enabled", False),
+    )
+    tg_token = st.text_input(
+        "Token del bot de Telegram",
+        value=alerts_cfg.get("telegram_token", ""),
+        type="password",
+        placeholder="123456:ABC-DEFghijkl...",
+    )
+    tg_chat_id = st.text_input(
+        "Chat ID destino",
+        value=alerts_cfg.get("telegram_chat_id", ""),
+        placeholder="987654321 o -1001234567890",
+    )
+    alert_mode = st.radio(
+        "Enviar alertas de",
+        ["both", "buy", "sell"],
+        index=["both", "buy", "sell"].index(alerts_cfg.get("mode", "both")),
+        horizontal=True,
+        format_func=lambda m: {"both": "Compra y Venta", "buy": "Solo Compra", "sell": "Solo Venta"}[m],
+    )
+
+    cfg.setdefault("alerts", {})
+    cfg["alerts"]["enabled"] = alerts_enabled
+    cfg["alerts"]["telegram_token"] = tg_token
+    cfg["alerts"]["telegram_chat_id"] = tg_chat_id
+    cfg["alerts"]["mode"] = alert_mode
+
+    if st.button("🔔 Enviar mensaje de prueba"):
+        if tg_token and tg_chat_id:
+            from trading_platform.alerts.telegram import TelegramAlerter
+            alerter = TelegramAlerter(bot_token=tg_token, chat_id=tg_chat_id)
+            ok, msg = alerter.test_connection()
+            if ok:
+                st.success(msg)
+            else:
+                st.error(msg)
+        else:
+            st.warning("Introduce el token y el chat_id antes de hacer la prueba.")
 
 st.markdown("---")
 if st.button("💾 Guardar configuración", type="primary"):
