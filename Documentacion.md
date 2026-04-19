@@ -1,4 +1,4 @@
-# Trading Platform — Documentación Técnica v2.1
+# Trading Platform — Documentación Técnica v2.2
 
 > Plataforma personal de análisis técnico de acciones. Arquitectura modular, UI Streamlit, múltiples mercados, sin costes de API.
 
@@ -15,10 +15,12 @@
 7. [Señales y recomendaciones](#7-señales-y-recomendaciones)
 8. [Backtesting](#8-backtesting)
 9. [Visualización](#9-visualización)
-10. [Configuración](#10-configuración)
-11. [Instalación y arranque](#11-instalación-y-arranque)
-12. [Bugs corregidos en v2.0](#12-bugs-corregidos-en-v20)
-13. [Hoja de ruta](#13-hoja-de-ruta)
+10. [Alertas Telegram](#10-alertas-telegram)
+11. [Watchlists persistentes](#11-watchlists-persistentes)
+12. [Configuración](#12-configuración)
+13. [Instalación y arranque](#13-instalación-y-arranque)
+14. [Bugs corregidos](#14-bugs-corregidos)
+15. [Hoja de ruta](#15-hoja-de-ruta)
 
 ---
 
@@ -28,11 +30,13 @@
 Trading_platform/
 ├── app/                        # Interfaz Streamlit
 │   ├── main.py                 # Página de bienvenida
+│   ├── components/             # Componentes reutilizables de la UI
+│   │   └── theme.py            # CSS dark mode, sparkline helper, export CSV ES
 │   └── pages/
-│       ├── 1_📋_Watchlist.py   # Selección de mercado + acciones
-│       ├── 2_📈_Análisis.py    # Pipeline de análisis + botón RUN
+│       ├── 1_📋_Watchlist.py   # Selección de mercado + gestión de watchlists
+│       ├── 2_📈_Análisis.py    # Pipeline de análisis + RUN + alertas
 │       ├── 3_🔬_Backtesting.py # Evaluación histórica de estrategias
-│       └── 4_⚙️_Configuración.py
+│       └── 4_⚙️_Configuración.py # Config, API keys, alertas Telegram
 │
 ├── config/
 │   └── config.json             # Configuración centralizada
@@ -47,8 +51,9 @@ Trading_platform/
 │   │   ├── eurostoxx50.csv
 │   │   ├── ftse100.csv
 │   │   └── nikkei225_sample.csv
-│   ├── watchlists/
-│   │   └── default.csv         # Watchlist activa del usuario
+│   ├── watchlists/             # Watchlists del usuario (versionadas)
+│   │   ├── default.csv         # Watchlist que carga al inicio
+│   │   └── *.csv               # Watchlists nombradas guardadas desde la UI
 │   ├── cache/                  # Caché JSON de datos descargados (gitignored)
 │   ├── db/                     # Base de datos SQLite (gitignored)
 │   └── outputs/                # Informes, CSV, logs (gitignored)
@@ -58,25 +63,25 @@ Trading_platform/
 │
 ├── docs/
 │   └── troubleshooting/
-│       └── ssl.md              # Solución al problema SSL en Windows
+│       └── ssl.md
 │
 ├── src/
 │   └── trading_platform/       # Paquete Python instalable
 │       ├── core/               # Constantes, config, logging, utils
-│       ├── providers/          # Stooq, yfinance, orquestador con fallback
-│       ├── storage/            # SQLite + caché JSON
+│       ├── providers/          # yfinance, Stooq, orquestador, stubs de pago
+│       ├── storage/            # SQLite + caché JSON + watchlist manager
 │       ├── indicators/         # Indicadores básicos y avanzados
 │       ├── signals/            # Generador de señales de trading
 │       ├── backtesting/        # Motor de backtesting + métricas
+│       ├── alerts/             # Alertas Telegram
 │       ├── visualization/      # Gráficos Plotly + dashboard HTML
-│       ├── pipeline/           # Orquestador + procesamiento paralelo
-│       └── cli.py              # Punto de entrada de línea de comandos
+│       └── pipeline/           # Orquestador + procesamiento paralelo
 │
 ├── tests/                      # Tests (pytest)
-├── .streamlit/config.toml      # Tema Streamlit
-├── pyproject.toml              # Metadatos del proyecto y dependencias
+├── .streamlit/config.toml      # Tema Streamlit (light por defecto)
+├── pyproject.toml
 ├── .gitignore
-└── .env.example                # Plantilla de variables de entorno
+└── .env.example
 ```
 
 ---
@@ -87,31 +92,32 @@ Trading_platform/
 Usuario
   │
   ▼
-┌─────────────────────────────────────────────────────┐
-│  Streamlit UI  (app/)                                │
-│  Watchlist → [RUN] → resultados en pantalla          │
-└────────────────────┬────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│  Streamlit UI  (app/)                                    │
+│  Watchlist → [RUN] → resultados → alertas Telegram       │
+└────────────────────┬────────────────────────────────────┘
                      │
                      ▼
-┌─────────────────────────────────────────────────────┐
-│  Pipeline (pipeline/runner.py)                       │
-│  TradingPlatform.run_tickers()                       │
-└──┬──────────┬───────────┬──────────────┬────────────┘
-   │          │           │              │
-   ▼          ▼           ▼              ▼
-providers  indicators  signals    visualization
-(datos)    (técnicos)  (señales)  (HTML + dashboard)
+┌─────────────────────────────────────────────────────────┐
+│  Pipeline (pipeline/runner.py)                           │
+│  TradingPlatform.run_tickers()                           │
+└──┬────────┬──────────┬──────────┬────────────┬──────────┘
+   │        │          │          │            │
+   ▼        ▼          ▼          ▼            ▼
+providers indicators signals visualization  alerts
+(datos)   (técnicos) (señales) (HTML)      (Telegram)
    │
    ├── yfinance (primario — gratuito, cobertura global)
-   └── Stooq (fallback — requiere API key gratuita)
+   ├── Stooq (fallback — gratuito con API key)
+   └── FMP / EODHD / Polygon / Finnhub (stubs — activar al contratar)
 ```
 
 ### Principio de extensibilidad de proveedores
 
-Añadir un proveedor de pago (Alpha Vantage, Polygon…) requiere:
-1. Crear `src/trading_platform/providers/nuevo_proveedor.py` implementando `DataProvider`.
-2. Añadirlo a la lista en `orchestrator.py`.
-3. Poner la API key en `.env`.
+Añadir un proveedor de pago requiere:
+1. Implementar `fetch_ohlcv()` en la clase correspondiente de `providers/_stubs.py`.
+2. Añadir su instancia al inicio de la lista en `orchestrator.py`.
+3. Pegar la API key en ⚙️ Configuración → Proveedores.
 
 Sin tocar el resto del código.
 
@@ -124,24 +130,20 @@ Sin tocar el resto del código.
 ```bash
 cd Trading_platform
 python -m streamlit run app/main.py
+# → http://localhost:8501
 ```
 
-1. **📋 Watchlist**: Elige un mercado (IBEX 35, S&P 500, DAX 40…) → filtra por sector → marca acciones → "Añadir a Watchlist".
-2. **📈 Análisis**: Ajusta parámetros (días de histórico) → pulsa **[RUN]** → ve resultados por tabs (Compra / Venta / Neutral) → descarga informes HTML.
-3. **🔬 Backtesting**: Selecciona un ticker y estrategia → ajusta costes de transacción → pulsa "Ejecutar Backtest" → ve métricas y curva de capital.
-4. **⚙️ Configuración**: Ajusta parámetros globales → "Guardar configuración".
+1. **📋 Watchlist** — Elige mercado → filtra sector → marca acciones → "Añadir a Watchlist". Guarda con nombre para reutilizar. Exporta a CSV formato europeo.
+2. **📈 Análisis** — Ajusta parámetros → **[RUN]** → ve resultados por tabs (Compra/Venta/Neutral). Filtra por señal, busca ticker, ordena. Si las alertas Telegram están configuradas, recibe el resumen en Telegram automáticamente.
+3. **🔬 Backtesting** — Selecciona ticker y estrategia → ajusta costes → "Ejecutar Backtest" → ve métricas, curva de capital y tabla de operaciones. Exporta a CSV.
+4. **⚙️ Configuración** — Ajusta todos los parámetros globales, API keys, alertas Telegram.
 
 ### Línea de comandos
 
 ```bash
-# Instalar en modo editable
 pip install -e .
-
-# Ejecutar análisis de tickers específicos
 trading-platform --tickers SAN.MC BBVA.MC AAPL --days 365
-
-# Ejecutar con la watchlist por defecto (data/watchlists/default.csv)
-trading-platform
+trading-platform   # usa la watchlist default
 ```
 
 ---
@@ -152,63 +154,77 @@ trading-platform
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `constants.py` | `ROOT_DIR`, rutas de todos los directorios; mapas de columnas |
-| `config.py` | `ConfigManager` — lee `config/config.json`, con valores por defecto |
-| `logging.py` | `TradingLogger` singleton; escribe en `data/outputs/logs/control.txt` |
-| `utils.py` | Renombrado de columnas, formateo CSV Excel, builders de filas de tabla |
+| `constants.py` | `ROOT_DIR`, rutas de directorios; mapas de columnas OHLCV |
+| `config.py` | `ConfigManager` — lee `config/config.json` |
+| `logging.py` | Logger singleton; escribe en `data/outputs/logs/` |
+| `utils.py` | Renombrado de columnas, formateo CSV, builders de tabla |
 
 ### `providers/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `base.py` | Clase base `DataProvider` (Protocol) + excepciones |
-| `stooq.py` | Descarga CSV de Stooq; mapea sufijos Yahoo→Stooq (`.MC`→`.es`) |
-| `yfinance_provider.py` | `auto_adjust=True`; normaliza MultiIndex yfinance |
-| `orchestrator.py` | Prueba proveedores en orden; alias `descargar_datos()` para retrocompatibilidad |
+| `base.py` | Clase base `DataProvider` + excepciones `ProviderError`, `AllProvidersFailed` |
+| `yfinance_provider.py` | Proveedor primario; `auto_adjust=True`; normaliza MultiIndex |
+| `stooq.py` | Fallback; mapeo de sufijos Yahoo→Stooq; detecta ausencia de API key |
+| `orchestrator.py` | Prueba proveedores en orden; alias `descargar_datos()` |
+| `_stubs.py` | Esqueletos listos para activar: `FMPProvider`, `EODHDProvider`, `PolygonProvider`, `FinnhubProvider` |
 
 ### `storage/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
 | `database.py` | SQLite con `executemany()`; acepta `db_path` opcional para tests |
-| `cache.py` | Caché JSON con TTL; `invalidate(ticker,start,end)` y `clear()`; acepta `cache_dir` opcional |
+| `cache.py` | Caché JSON con TTL; `invalidate()` y `clear()`; acepta `cache_dir` opcional |
+| `watchlist_manager.py` | CRUD de watchlists: `list_watchlists()`, `load_watchlist()`, `save_watchlist()`, `delete_watchlist()`, `rename_watchlist()` |
+
+### `alerts/`
+
+| Archivo | Responsabilidad |
+|---------|----------------|
+| `telegram.py` | `TelegramAlerter` — cliente Telegram Bot API sin dependencias externas; `send()`, `test_connection()`, `alert_signals()` |
 
 ### `indicators/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `basic.py` | RSI, MACD, Bollinger, SMA 30/60/90, Williams %R (columnas estandarizadas) |
+| `basic.py` | RSI, MACD, Bollinger, SMA 30/60/90, Williams %R |
 | `advanced.py` | StochRSI, TSI, UO, Chaikin, Aroon, TRIX, VolumeRSI, DPO |
 
 ### `signals/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `generator.py` | Sistema de votación; devuelve `COMPRA / VENTA / KEEP/NO SIGNAL` por indicador + resumen |
-| `advanced.py` | Señales para los indicadores avanzados |
+| `generator.py` | Sistema de votación; devuelve `COMPRA / VENTA / KEEP/NO SIGNAL` |
+| `advanced.py` | Señales para indicadores avanzados |
 
 ### `backtesting/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `costs.py` | `TransactionCosts` — comisión porcentual + mínimo + slippage en bps |
+| `costs.py` | `TransactionCosts` — comisión % + mínimo + slippage bps |
 | `metrics.py` | CAGR, Sharpe, Sortino, Max Drawdown, Profit Factor, Win Rate |
-| `engine.py` | `BacktestingEngine` — `run(tickers)` descarga datos; `run_on_df(df)` para Streamlit; 4 estrategias |
+| `engine.py` | `BacktestingEngine`; `run(tickers)` y `run_on_df(df)`; 4 estrategias |
 
 ### `visualization/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
 | `theme.py` | Diccionarios de colores `light` / `dark` |
-| `charts.py` | Gráfico Plotly de 5 paneles (velas, volumen, MACD, RSI, Williams) + tabla |
+| `charts.py` | Gráfico Plotly 5 paneles (velas, volumen, MACD, RSI, Williams) |
 | `dashboard.py` | Dashboard HTML consolidado con gauge, heatmap, scatter y tabla filtrable |
 
 ### `pipeline/`
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `runner.py` | `TradingPlatform` — orquesta descarga→indicadores→señales→gráficos |
-| `parallel.py` | `ParallelProcessor` con `ThreadPoolExecutor` + `process_single_ticker()` |
+| `runner.py` | `TradingPlatform.run_tickers()` — orquesta todo el pipeline |
+| `parallel.py` | `ParallelProcessor` con `ThreadPoolExecutor` |
+
+### `app/components/`
+
+| Archivo | Responsabilidad |
+|---------|----------------|
+| `theme.py` | `apply_theme()` inyecta CSS dark mode; `sparkline()` helper Plotly; `export_csv_es()` — CSV con separador `;` y decimal `,` |
 
 ---
 
@@ -216,32 +232,37 @@ trading-platform
 
 ### yfinance (primario)
 
-- **Gratuito**, sin API key, cobertura global excelente (IBEX 35, SP500, DAX, FTSE 100…).
-- `auto_adjust=True` corrige precios históricos por dividendos y splits.
-- Es el proveedor activo por defecto desde v2.1 (Stooq cambió su política).
-
-> **Nota SSL en Windows**: si aparece un error SSL con `curl_cffi`, ver `docs/troubleshooting/ssl.md`. En la práctica no afecta porque yfinance funciona con la pila SSL estándar de Python.
+- Gratuito, sin API key, cobertura global.
+- `auto_adjust=True` corrige dividendos y splits.
+- Activo por defecto desde v2.1 (Stooq exige API key).
 
 ### Stooq (fallback)
 
-- **Gratuito** pero **requiere API key** (registro con captcha en [stooq.com](https://stooq.com/q/d/?s=san.es&get_apikey)).
-- Excelente cobertura europea. Descarga CSVs directamente.
-- Se activa si yfinance falla para un ticker concreto.
-- **Mapeo de sufijos** Yahoo Finance → Stooq:
+- Gratuito con API key (registro en stooq.com).
+- Excelente cobertura europea. Mapeo de sufijos:
 
 | Yahoo | Stooq | Mercado |
 |-------|-------|---------|
-| `.MC` | `.es` | España (BME) |
-| `.DE` | `.de` | Alemania (XETRA) |
+| `.MC` | `.es` | España |
+| `.DE` | `.de` | Alemania |
 | `.PA` | `.fr` | Francia |
 | `.L`  | `.uk` | Reino Unido |
 | `.T`  | `.jp` | Japón |
-| _(sin sufijo)_ | `.us` | EE.UU. |
 
-Para activar Stooq con API key, añadir en `config/config.json`:
-```json
-"providers": { "api_keys": { "stooq": "TU_CLAVE_AQUI" } }
-```
+### Stubs de pago (listos para activar)
+
+| Clase | Proveedor | Coste orientativo | Mejor uso |
+|-------|-----------|-------------------|-----------|
+| `FMPProvider` | Financial Modeling Prep | ~22 USD/mes | Fundamentales históricos, ratings |
+| `EODHDProvider` | EOD Historical Data | ~20 USD/mes | OHLCV 70+ mercados, dividendos precisos |
+| `PolygonProvider` | Polygon.io | ~29 USD/mes | Real-time US, opciones, cripto |
+| `FinnhubProvider` | Finnhub | Free US / pago EU | Earnings calendar, news, sentimiento |
+
+**Activar un stub:**
+1. Obtener API key del proveedor.
+2. Pegarla en ⚙️ Configuración → Proveedores.
+3. Implementar `fetch_ohlcv()` en `providers/_stubs.py` siguiendo los comentarios TODO.
+4. Añadir instancia al inicio de `DataOrchestrator.providers`.
 
 ---
 
@@ -251,15 +272,13 @@ Para activar Stooq con API key, añadir en `config/config.json`:
 
 | Indicador | Columna(s) | Descripción |
 |-----------|-----------|-------------|
-| SMA 30 | `SMA_30` | Media móvil simple 30 días |
-| SMA 60 | `SMA_60` | Media móvil simple 60 días |
-| SMA 90 | `SMA_90` | Media móvil simple 90 días |
+| SMA 30/60/90 | `SMA_30`, `SMA_60`, `SMA_90` | Medias móviles simples |
 | RSI | `RSI` | Relative Strength Index (14 períodos) |
 | MACD | `MACD`, `MACDs`, `MACDh` | MACD(12,26,9) — línea, señal, histograma |
 | Bollinger | `BBU_BB`, `BBL_BB`, `BBM_BB` | Bandas de Bollinger (20, 2σ) |
 | Williams %R | `WILLR` | Williams Percent Range (14 períodos) |
 
-### Avanzados (opcionales, actívense en config)
+### Avanzados (opcionales, activar en config)
 
 StochRSI, TSI, Ultimate Oscillator, Chaikin Money Flow, Aroon, TRIX, Volume RSI, DPO.
 
@@ -267,17 +286,17 @@ StochRSI, TSI, Ultimate Oscillator, Chaikin Money Flow, Aroon, TRIX, Volume RSI,
 
 ## 7. Señales y recomendaciones
 
-El sistema de votación en `signals/generator.py` evalúa cada indicador y produce:
+Sistema de votación en `signals/generator.py`:
 
 | Señal | Descripción |
 |-------|-------------|
-| `COMPRA` | El indicador está en zona alcista |
-| `VENTA` | El indicador está en zona bajista |
+| `COMPRA` | Indicador en zona alcista |
+| `VENTA` | Indicador en zona bajista |
 | `KEEP/NO SIGNAL` | Zona neutral |
 
-**Resumen final**: mayoría de votos entre COMPRA y VENTA. Si hay empate → KEEP.
+Resumen final: mayoría de votos. Empate → KEEP.
 
-> **Aviso**: Las señales son indicativas. No constituyen asesoramiento financiero.
+> Las señales son indicativas. No constituyen asesoramiento financiero.
 
 ---
 
@@ -287,58 +306,108 @@ El sistema de votación en `signals/generator.py` evalúa cada indicador y produ
 
 | ID | Nombre | Lógica |
 |----|--------|--------|
-| `sma_crossover` | Cruce de medias | Compra cuando SMA30 > SMA90; vende cuando SMA30 < SMA90 |
-| `rsi_oversold` | RSI sobrevendido | Compra cuando RSI < 30; vende cuando RSI > 70 |
-| `macd_signal` | Cruce MACD | Compra cuando MACD cruza al alza la línea de señal |
+| `sma_crossover` | Cruce de medias | Compra SMA30 > SMA90; vende SMA30 < SMA90 |
+| `rsi_oversold` | RSI sobrevendido | Compra RSI < 30; vende RSI > 70 |
+| `macd_signal` | Cruce MACD | Compra al cruce alcista MACD/señal |
 | `bollinger_reversion` | Reversión Bollinger | Compra en banda inferior; vende en banda superior |
 
-### Costes de transacción
+### Costes de transacción (configurables)
 
 ```python
 TransactionCosts(
     commission_pct = 0.002,   # 0.2% por operación
     min_commission = 1.0,     # mínimo 1€
-    slippage_bps   = 5.0,     # 5 puntos básicos de slippage
+    slippage_bps   = 5.0,     # 5 puntos básicos
 )
 ```
 
 ### Métricas de salida
 
-- **Total Return** — rentabilidad total del período
-- **CAGR** — tasa de crecimiento anual compuesta
-- **Sharpe Ratio** — rentabilidad ajustada al riesgo (rf=0)
-- **Sortino Ratio** — como Sharpe pero sólo penaliza la volatilidad bajista
-- **Max Drawdown** — caída máxima desde máximo histórico
-- **Win Rate** — porcentaje de operaciones ganadoras
-- **Profit Factor** — suma de ganancias / suma de pérdidas
+Total Return, CAGR, Sharpe, Sortino, Max Drawdown, Win Rate, Profit Factor, número y detalle de operaciones.
 
 ---
 
 ## 9. Visualización
 
-### Informe individual por ticker (`{ticker}_analisis.html`)
+### Página Análisis
 
-- **Panel 1**: Velas japonesas + SMA 30/60/90 + Bandas de Bollinger
-- **Panel 2**: Volumen (coloreado: verde=subida, rojo=bajada)
-- **Panel 3**: MACD + histograma + línea de señal
-- **Panel 4**: RSI con zonas de sobrecompra/sobreventa
-- **Panel 5**: Williams %R con zonas extremas
-- Tabla con 10 sesiones recientes + tabla de señales por indicador
+- **Sparklines**: gráfico de línea minimalista (últimas 30 sesiones) en cada tarjeta, coloreado en verde/rojo según la señal detectada.
+- **Filtros**: por tipo de señal (COMPRA/VENTA/NEUTRAL), búsqueda por ticker o empresa, ordenación por señal/ticker/RSI/volatilidad.
+- **Pestaña "Tabla resumen"**: vista tabular de todos los resultados filtrados.
+- **Export CSV**: formato europeo (separador `;`, decimal `,`, BOM UTF-8 para Excel).
+
+### Informe individual (`{ticker}_analisis.html`)
+
+Velas + SMA/Bollinger, Volumen, MACD, RSI, Williams %R. Tabla de señales por indicador.
 
 ### Dashboard consolidado (`dashboard_consolidado.html`)
 
-- KPIs: total tickers, señales compra/venta, sentimiento alcista
-- Gauge de sentimiento de mercado (Plotly)
-- Heatmap de volatilidad por ticker
-- Tabla interactiva filtrable (buscar, filtrar por señal)
-- Scatter RSI vs Williams %R (coloreado por señal)
-- Clic en cualquier fila abre el informe individual del ticker
+KPIs, gauge de sentimiento, heatmap de volatilidad, tabla interactiva, scatter RSI vs Williams %R.
+
+### Dark mode
+
+Toggle en ⚙️ Configuración → Interfaz. Se persiste en `config.json` y se aplica mediante inyección CSS al recargar cualquier página. El template de Plotly cambia dinámicamente entre `plotly_white` y `plotly_dark`.
 
 ---
 
-## 10. Configuración
+## 10. Alertas Telegram
 
-`config/config.json` controla todos los parámetros:
+Recibe un resumen de señales detectadas en Telegram después de cada RUN.
+
+### Configuración
+
+1. Habla con [@BotFather](https://t.me/BotFather) → `/newbot` → copia el token.
+2. Habla con [@userinfobot](https://t.me/userinfobot) para obtener tu `chat_id`.
+3. En ⚙️ Configuración → Alertas: pega token, chat_id y elige el modo.
+4. Pulsa "Enviar mensaje de prueba" para verificar.
+5. Guarda la configuración.
+
+### Modos de alerta
+
+| Modo | Comportamiento |
+|------|---------------|
+| `both` | Envía alertas de COMPRA y VENTA |
+| `buy` | Solo señales de COMPRA |
+| `sell` | Solo señales de VENTA |
+
+### Sin dependencias externas
+
+El cliente Telegram usa únicamente `urllib` de la biblioteca estándar de Python. No requiere instalar `python-telegram-bot` ni ninguna otra librería.
+
+---
+
+## 11. Watchlists persistentes
+
+Las watchlists se guardan como CSV en `data/watchlists/`.
+
+### Operaciones disponibles
+
+| Operación | Desde la UI | Desde código |
+|-----------|-------------|-------------|
+| Guardar con nombre | Campo de texto + botón "💾 Guardar" | `save_watchlist(records, name)` |
+| Cargar | Sidebar → botón con nombre | `load_watchlist(filename)` |
+| Borrar | Sidebar → botón 🗑 | `delete_watchlist(filename)` |
+| Listar | Sidebar (automático) | `list_watchlists()` |
+| Renombrar | — | `rename_watchlist(old, new)` |
+
+### Formato del fichero
+
+```csv
+ticker,name,sector
+BBVA.MC,Banco Bilbao Vizcaya Argentaria,Banca
+SAN.MC,Banco Santander,Banca
+AAPL,Apple Inc.,Tecnología
+```
+
+### Nombres de fichero
+
+El nombre que introduce el usuario se convierte a slug seguro: `"IBEX favoritas"` → `ibex_favoritas.csv`.
+
+---
+
+## 12. Configuración
+
+`config/config.json` — estructura completa:
 
 ```json
 {
@@ -355,7 +424,13 @@ TransactionCosts(
   "providers": {
     "primary": "yfinance",
     "fallback": ["stooq"],
-    "api_keys": { "stooq": "" }
+    "api_keys": {
+      "stooq": "",
+      "fmp": "",
+      "eodhd": "",
+      "polygon": "",
+      "finnhub": ""
+    }
   },
   "indicators": {
     "advanced_enabled": false
@@ -369,13 +444,19 @@ TransactionCosts(
     "theme": "light",
     "default_market": "ibex35",
     "chart_months": 24
+  },
+  "alerts": {
+    "enabled": false,
+    "telegram_token": "",
+    "telegram_chat_id": "",
+    "mode": "both"
   }
 }
 ```
 
 ---
 
-## 11. Instalación y arranque
+## 13. Instalación y arranque
 
 ### Prerrequisitos
 
@@ -385,22 +466,15 @@ TransactionCosts(
 ### Instalación
 
 ```bash
-# Clonar repositorio
 git clone <repo> && cd Trading_platform
-
-# Crear entorno virtual
 python -m venv venv
 source venv/bin/activate        # Linux/macOS
 venv\Scripts\activate           # Windows
-
-# Instalar en modo editable (incluye dependencias)
 pip install -e .
-
-# (Opcional) crear variables de entorno
-cp .env.example .env
+cp .env.example .env            # opcional
 ```
 
-### Arrancar la interfaz
+### Arrancar la UI
 
 ```bash
 python -m streamlit run app/main.py
@@ -411,55 +485,53 @@ python -m streamlit run app/main.py
 
 ```bash
 trading-platform --tickers SAN.MC BBVA.MC AAPL
-trading-platform --days 365 --output /ruta/salida
+trading-platform   # usa data/watchlists/default.csv
 ```
 
 ---
 
-## 12. Bugs corregidos en v2.0
+## 14. Bugs corregidos
 
-| ID | Descripción | Solución |
-|----|-------------|---------|
-| **B1** | MACD bug: `backtesting_engine.py` usaba `MACD_12_26_9` pero los indicadores generaban `MACD`/`MACDs` | Estandarizado a `MACD`/`MACDs`/`MACDh` en todo el código |
-| **B2** | SQLite: inserción fila a fila (lento con 20 000+ registros) | `executemany()` con inserción en bloque |
-| **B3** | Rutas hardcodeadas al directorio de trabajo (`CWD`) | `ROOT_DIR` via `pathlib.Path(__file__).parent` en `constants.py` |
-| **B4** | API key de Alpha Vantage en texto plano versionado en git | Movida a `.env` (en `.gitignore`); plantilla en `.env.example` |
-| **B5** | `auto_adjust=False` en yfinance distorsionaba históricos pre-split | Cambiado a `auto_adjust=True` |
-| **B6** | SSL error con acentos en ruta de usuario Windows | yfinance usa SSL estándar de Python; Stooq pasa a fallback |
-| **B7** | `SyntaxError` f-string en `dashboard.py` (Python 3.13) | `}}}` → `}}` en línea del gauge de Plotly |
-| **B8** | `BacktestingEngine` nombres de estrategias incoherentes | Unificados: `sma_crossover`, `rsi_oversold`, `macd_signal`, `bollinger_reversion` |
-| **B9** | Stooq cambió política: ahora requiere API key | Detectado el mensaje de API key; yfinance pasa a ser primario |
-
----
-
-## 13. Hoja de ruta
-
-### Fase 1 — Completada (v2.0)
-- [x] Estructura de directorios limpia
-- [x] Arquitectura de proveedores extensible (Stooq + yfinance)
-- [x] Corrección de todos los bugs conocidos
-- [x] Interfaz Streamlit con flujo Watchlist → RUN
-- [x] Backtesting con costes de transacción reales
-- [x] 8 índices bursátiles en archivos CSV
-
-### Fase 1 completada (v2.1)
-- [x] Tests: 40 tests, 0 fallos (indicadores, señales, backtesting, storage, providers)
-- [x] `BacktestingEngine.run_on_df()` para uso desde Streamlit
-- [x] yfinance como proveedor primario (Stooq requiere API key desde 2026)
-- [x] `cache.invalidate()` y rutas configurables en storage para testabilidad
-
-### Fase 2 — Próximos pasos
-- [ ] Proveedor FRED para datos macroeconómicos (gratis)
-- [ ] Alertas por email cuando una señal cambia de estado
-- [ ] Exportación a Excel con formato ES (separador `;`, decimal `,`)
-- [ ] Comparación multi-ticker en el mismo gráfico
-
-### Fase 3 — Futuro
-- [ ] Soporte para Alpha Vantage / Polygon (con API key)
-- [ ] Análisis de correlación entre activos
-- [ ] Optimización automática de parámetros de estrategia
-- [ ] Modo Docker para despliegue en servidor propio
+| ID | Versión | Descripción | Solución |
+|----|---------|-------------|---------|
+| B1 | v2.0 | MACD bug: columnas `MACD_12_26_9` vs `MACD` | Estandarizadas a `MACD`/`MACDs`/`MACDh` |
+| B2 | v2.0 | SQLite inserción fila a fila (lento) | `executemany()` |
+| B3 | v2.0 | Rutas hardcodeadas al CWD | `ROOT_DIR` via `pathlib` en `constants.py` |
+| B4 | v2.0 | API key Alpha Vantage en git | Movida a `.env` |
+| B5 | v2.0 | `auto_adjust=False` en yfinance | Cambiado a `True` |
+| B6 | v2.0 | SSL error Windows con rutas con acentos | yfinance usa SSL estándar de Python |
+| B7 | v2.1 | `SyntaxError` f-string `dashboard.py` Python 3.13 | `}}}` → `}}` en gauge Plotly |
+| B8 | v2.1 | Nombres de estrategia incoherentes en backtesting | Unificados: `sma_crossover`, `rsi_oversold`, `macd_signal`, `bollinger_reversion` |
+| B9 | v2.1 | Stooq cambió política: exige API key | Detectado; yfinance pasa a ser primario |
+| B10 | v2.1 | Sortino `RuntimeWarning` divide-by-zero | `np.std([x])` = 0 → condición `len(neg_returns) > 1` |
 
 ---
 
-*Última actualización: 2026-04-19 · Trading Platform v2.1.0*
+## 15. Hoja de ruta
+
+### Completado
+
+| Fase | Versión | Contenido |
+|------|---------|-----------|
+| F0 · Limpieza estructural | v2.0 | Reorganización de directorios, purga de secretos, pyproject.toml |
+| F1 · DataProvider abstraction | v2.0 | Stooq + yfinance + orchestrator con fallback |
+| F2 · Market CSV datasets | v2.0 | 8 índices bursátiles en `data/markets/` |
+| F3 · UI Streamlit base | v2.0 | 4 páginas, flujo Watchlist → RUN |
+| F4 · Backtesting honesto | v2.0 | Costes, slippage, Sharpe, CAGR, Max Drawdown |
+| F5 · UI polish | v2.2 | Dark mode, sparklines, filtros, export CSV ES |
+| F6 · Watchlists persistentes | v2.2 | Guardar/cargar múltiples watchlists con nombre |
+| F7 · Alertas Telegram | v2.2 | Bot sin dependencias externas; disparo automático tras RUN |
+| F8 · Stubs providers de pago | v2.2 | FMP, EODHD, Polygon, Finnhub listos para activar |
+
+### Posibles mejoras futuras
+
+- Proveedor FRED para datos macroeconómicos (tipos, VIX, inflación) — gratuito.
+- Comparación multi-ticker en el mismo gráfico.
+- Análisis de correlación entre activos.
+- Optimización automática de parámetros de estrategia (grid search).
+- Modo Docker para despliegue en servidor propio.
+- Benchmark buy & hold en gráfico de backtesting.
+
+---
+
+*Última actualización: 2026-04-19 · Trading Platform v2.2.0*
