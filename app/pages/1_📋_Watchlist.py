@@ -12,12 +12,16 @@ import streamlit as st
 st.set_page_config(page_title="Watchlist", page_icon="📋", layout="wide")
 
 from components.theme import apply_theme, export_csv_es
+from trading_platform.storage.watchlist_manager import (
+    list_watchlists,
+    load_watchlist,
+    save_watchlist,
+    delete_watchlist,
+)
 
 apply_theme()
 
 MARKETS_DIR = Path(__file__).parent.parent.parent / "data" / "markets"
-WATCHLISTS_DIR = Path(__file__).parent.parent.parent / "data" / "watchlists"
-WATCHLISTS_DIR.mkdir(parents=True, exist_ok=True)
 
 MARKET_FILES = {
     "IBEX 35": "ibex35.csv",
@@ -30,13 +34,10 @@ MARKET_FILES = {
     "Nikkei 225 (muestra)": "nikkei225_sample.csv",
 }
 
+# ── Inicializar estado ────────────────────────────────────────
 if "watchlist" not in st.session_state:
-    default_file = WATCHLISTS_DIR / "default.csv"
-    if default_file.exists():
-        df_default = pd.read_csv(default_file)
-        st.session_state["watchlist"] = df_default.to_dict("records")
-    else:
-        st.session_state["watchlist"] = []
+    records = load_watchlist("default.csv")
+    st.session_state["watchlist"] = records or []
 
 
 def _load_market(filename: str) -> pd.DataFrame:
@@ -46,15 +47,37 @@ def _load_market(filename: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def _save_watchlist():
-    df = pd.DataFrame(st.session_state["watchlist"])
-    df.to_csv(WATCHLISTS_DIR / "default.csv", index=False)
-    st.success("Watchlist guardada.")
-
-
+# ── Título + barra de watchlists guardadas ────────────────────
 st.title("📋 Watchlist")
 st.caption("Selecciona un mercado, elige acciones y añádelas a tu watchlist.")
 
+# Panel lateral: gestión de watchlists guardadas
+with st.sidebar:
+    st.subheader("Mis watchlists")
+    saved = list_watchlists()
+
+    if saved:
+        for wl in saved:
+            col_a, col_b = st.columns([3, 1])
+            with col_a:
+                label = f"**{wl['display_name']}** ({wl['tickers']} tickers)"
+                if st.button(label, key=f"load_{wl['filename']}", use_container_width=True):
+                    records = load_watchlist(wl["filename"])
+                    if records is not None:
+                        st.session_state["watchlist"] = records
+                        st.session_state["_loaded_wl"] = wl["display_name"]
+                        st.rerun()
+            with col_b:
+                if st.button("🗑", key=f"del_{wl['filename']}", help="Eliminar esta watchlist"):
+                    delete_watchlist(wl["filename"])
+                    st.rerun()
+    else:
+        st.caption("No hay watchlists guardadas todavía.")
+
+    if "_loaded_wl" in st.session_state:
+        st.success(f"Cargada: {st.session_state.pop('_loaded_wl')}")
+
+# ── Columnas principales ──────────────────────────────────────
 col_left, col_right = st.columns([1.2, 1])
 
 with col_left:
@@ -122,7 +145,8 @@ with col_left:
                     st.info(f"{t} ya está en la watchlist.")
 
 with col_right:
-    st.subheader("Mi Watchlist")
+    st.subheader(f"Mi Watchlist ({len(st.session_state['watchlist'])} tickers)")
+
     if not st.session_state["watchlist"]:
         st.info("Tu watchlist está vacía. Selecciona acciones del panel izquierdo.")
     else:
@@ -139,10 +163,11 @@ with col_right:
             },
             hide_index=True,
             use_container_width=True,
-            height=400,
+            height=350,
         )
 
-        btn_col1, btn_col2, btn_col3, btn_col4 = st.columns(4)
+        # ── Botones de acción ─────────────────────────────────
+        btn_col1, btn_col2, btn_col3 = st.columns(3)
         with btn_col1:
             if st.button("🗑 Eliminar selección"):
                 to_remove = edited_watch[edited_watch["🗑"] == True]["ticker"].tolist()
@@ -151,13 +176,10 @@ with col_right:
                 ]
                 st.rerun()
         with btn_col2:
-            if st.button("💾 Guardar watchlist"):
-                _save_watchlist()
-        with btn_col3:
-            if st.button("🧹 Vaciar watchlist"):
+            if st.button("🧹 Vaciar"):
                 st.session_state["watchlist"] = []
                 st.rerun()
-        with btn_col4:
+        with btn_col3:
             csv_bytes = export_csv_es(df_watch.drop(columns=["🗑"]))
             st.download_button(
                 "⬇ Exportar CSV",
@@ -167,6 +189,28 @@ with col_right:
                 help="Formato europeo (';' separador, ',' decimal)",
             )
 
+        # ── Guardar con nombre ────────────────────────────────
+        st.markdown("---")
+        st.markdown("**Guardar watchlist**")
+        save_col1, save_col2 = st.columns([2, 1])
+        with save_col1:
+            wl_name = st.text_input(
+                "Nombre de la watchlist",
+                value="default",
+                label_visibility="collapsed",
+                placeholder="Ej: IBEX favoritas",
+                key="wl_save_name",
+            )
+        with save_col2:
+            if st.button("💾 Guardar", type="primary", use_container_width=True):
+                if st.session_state["watchlist"]:
+                    save_watchlist(st.session_state["watchlist"], wl_name or "default")
+                    st.success(f"Watchlist '{wl_name}' guardada.")
+                    st.rerun()
+                else:
+                    st.warning("La watchlist está vacía.")
+
     st.markdown("---")
-    tickers_en_watchlist = [r["ticker"] for r in st.session_state.get("watchlist", [])]
-    st.info(f"**{len(tickers_en_watchlist)} tickers** listos para análisis.\n\nVe a **📈 Análisis** y pulsa **[RUN]**.")
+    n = len(st.session_state.get("watchlist", []))
+    if n > 0:
+        st.info(f"**{n} tickers** listos para análisis.\n\nVe a **📈 Análisis** y pulsa **[RUN]**.")
