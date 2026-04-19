@@ -11,9 +11,12 @@ import streamlit as st
 
 st.set_page_config(page_title="Análisis", page_icon="📈", layout="wide")
 
+import json as _json
+
 from components.theme import apply_theme, sparkline, export_csv_es
 from trading_platform.pipeline.runner import TradingPlatform
 from trading_platform.core.constants import REPORTS_DIR
+from trading_platform.alerts.telegram import from_config as _telegram_from_config
 
 apply_theme()
 
@@ -119,6 +122,22 @@ if run_clicked:
         platform = TradingPlatform()
         results = platform.run_tickers(tickers, analysis_days=days)
         st.session_state["last_results"] = results
+
+    # ── Alertas Telegram (si configuradas y habilitadas) ──────
+    _cfg_path = Path(__file__).parent.parent.parent / "config" / "config.json"
+    try:
+        _app_cfg = _json.loads(_cfg_path.read_text(encoding="utf-8"))
+    except Exception:
+        _app_cfg = {}
+    if _app_cfg.get("alerts", {}).get("enabled", False):
+        _alerter = _telegram_from_config(_app_cfg)
+        if _alerter:
+            _mode = _app_cfg["alerts"].get("mode", "both")
+            _sent = _alerter.alert_signals(results, min_signal=_mode)
+            if _sent:
+                st.toast("Alerta Telegram enviada.", icon="🔔")
+            else:
+                st.toast("Alerta configurada pero no se pudo enviar.", icon="⚠️")
 
 if "last_results" in st.session_state and st.session_state["last_results"]:
     results = st.session_state["last_results"]
