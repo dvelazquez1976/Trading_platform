@@ -1,0 +1,37 @@
+{
+  "data": {
+    "tickers_file": "data/watchlists/default.csv",
+    "analysis_period_days": 730,
+    "cache_enabled": true,
+    "cache_ttl_hours": 4
+  },
+  "processing": {
+    "parallel_processing": false,
+    "max_workers": 4
+  },
+  "providers": {
+    "primary": "stooq",
+    "fallback": ["yfinance"],
+    "api_keys": {}
+  },
+  "indicators": {
+    "enabled": ["RSI", "MACD", "Bollinger", "SMA", "Williams"],
+    "advanced_enabled": false,
+    "advanced": ["StochRSI", "TSI", "UO", "Chaikin", "Aroon", "TRIX", "VolumeRSI", "DPO"]
+  },
+  "backtesting": {
+    "commission_pct": 0.002,
+    "min_commission": 1.0,
+    "slippage_bps": 5.0
+  },
+  "output": {
+    "reports_dir": "data/outputs/reports",
+    "csv_dir": "data/outputs/csv",
+    "log_file": "data/outputs/logs/control.txt"
+  },
+  "ui": {
+    "theme": "light",
+    "default_market": "ibex35",
+    "chart_months": 24
+  }
+}

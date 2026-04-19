@@ -1,0 +1,3 @@
+from trading_platform.visualization.charts import generar_grafico
+from trading_platform.visualization.dashboard import generar_dashboard_consolidado
+from trading_platform.visualization.theme import get_theme

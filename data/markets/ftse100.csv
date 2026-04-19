@@ -1,0 +1,31 @@
+ticker,name,sector
+SHEL.L,Shell,Energía
+AZN.L,AstraZeneca,Salud
+HSBA.L,HSBC Holdings,Financiero
+ULVR.L,Unilever,Consumo básico
+RIO.L,Rio Tinto,Materiales
+GSK.L,GSK,Salud
+BP.L,BP,Energía
+LLOY.L,Lloyds Banking Group,Financiero
+DGE.L,Diageo,Consumo básico
+VOD.L,Vodafone Group,Telecomunicaciones
+REL.L,RELX,Media
+NG.L,National Grid,Utilities
+BAE.L,BAE Systems,Industrial
+RKT.L,Reckitt Benckiser,Consumo básico
+LSEG.L,London Stock Exchange Group,Financiero
+CPG.L,Compass Group,Consumo discrecional
+WPP.L,WPP,Media
+SSE.L,SSE,Utilities
+EXPN.L,Experian,Tecnología
+SGRO.L,Segro,Inmobiliario
+BT-A.L,BT Group,Telecomunicaciones
+STAN.L,Standard Chartered,Financiero
+PRU.L,Prudential,Financiero
+INF.L,Informa,Media
+BATS.L,British American Tobacco,Consumo básico
+GLEN.L,Glencore,Materiales
+AAL.L,Anglo American,Materiales
+MKS.L,Marks & Spencer,Consumo discrecional
+ABF.L,Associated British Foods,Consumo básico
+MNDI.L,Mondi,Materiales

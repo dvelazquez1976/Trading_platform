@@ -1,0 +1,41 @@
+ticker,name,sector
+MC.PA,LVMH,Consumo discrecional
+OR.PA,L'Oréal,Consumo básico
+AIR.PA,Airbus,Industrial
+SAN.PA,Sanofi,Salud
+TTE.PA,TotalEnergies,Energía
+BNP.PA,BNP Paribas,Financiero
+SU.PA,Schneider Electric,Industrial
+RI.PA,Pernod Ricard,Consumo básico
+KER.PA,Kering,Consumo discrecional
+CS.PA,AXA,Financiero
+SGO.PA,Saint-Gobain,Materiales
+CAP.PA,Capgemini,Tecnología
+EL.PA,EssilorLuxottica,Salud
+BN.PA,Danone,Consumo básico
+DG.PA,Vinci,Construcción
+RMS.PA,Hermès International,Consumo discrecional
+DSY.PA,Dassault Systèmes,Tecnología
+ORA.PA,Orange,Telecomunicaciones
+VIE.PA,Veolia Environnement,Utilities
+ACA.PA,Crédit Agricole,Financiero
+GLE.PA,Société Générale,Financiero
+ML.PA,Michelin,Automoción
+PUB.PA,Publicis Groupe,Media
+RNO.PA,Renault,Automoción
+STM.PA,STMicroelectronics,Tecnología
+AI.PA,Air Liquide,Materiales
+VK.PA,Vallourec,Materiales
+ENGI.PA,Engie,Utilities
+LR.PA,Legrand,Industrial
+SW.PA,Sodexo,Consumo discrecional
+SLB.PA,Schlumberger,Energía
+UG.PA,Peugeot,Automoción
+FP.PA,Total,Energía
+FR.PA,Valeo,Automoción
+EDF.PA,EDF,Utilities
+ERF.PA,Eurofins Scientific,Salud
+STLAM.PA,Stellantis,Automoción
+SOLB.PA,Solvay,Materiales
+TEC.PA,Technip Energies,Energía
+WLN.PA,Worldline,Tecnología

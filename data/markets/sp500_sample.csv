@@ -1,0 +1,51 @@
+ticker,name,sector
+AAPL,Apple,Tecnología
+MSFT,Microsoft,Tecnología
+AMZN,Amazon,Consumo discrecional
+GOOGL,Alphabet,Tecnología
+META,Meta Platforms,Tecnología
+NVDA,NVIDIA,Tecnología
+TSLA,Tesla,Automoción
+BRK-B,Berkshire Hathaway B,Financiero
+JPM,JPMorgan Chase,Financiero
+V,Visa,Financiero
+UNH,UnitedHealth Group,Salud
+JNJ,Johnson & Johnson,Salud
+PG,Procter & Gamble,Consumo básico
+HD,Home Depot,Consumo discrecional
+MA,Mastercard,Financiero
+XOM,Exxon Mobil,Energía
+ABBV,AbbVie,Salud
+CVX,Chevron,Energía
+MRK,Merck,Salud
+KO,Coca-Cola,Consumo básico
+PEP,PepsiCo,Consumo básico
+LLY,Eli Lilly,Salud
+BAC,Bank of America,Financiero
+WMT,Walmart,Consumo básico
+PFE,Pfizer,Salud
+TMO,Thermo Fisher Scientific,Salud
+COST,Costco,Consumo básico
+DIS,Walt Disney,Media
+CSCO,Cisco Systems,Tecnología
+NFLX,Netflix,Media
+ADBE,Adobe,Tecnología
+ACN,Accenture,Tecnología
+AMD,Advanced Micro Devices,Tecnología
+INTC,Intel,Tecnología
+QCOM,Qualcomm,Tecnología
+TXN,Texas Instruments,Tecnología
+HON,Honeywell,Industrial
+RTX,Raytheon Technologies,Industrial
+LMT,Lockheed Martin,Industrial
+GE,GE Aerospace,Industrial
+CAT,Caterpillar,Industrial
+DE,Deere & Company,Industrial
+UPS,United Parcel Service,Industrial
+BA,Boeing,Industrial
+GS,Goldman Sachs,Financiero
+MS,Morgan Stanley,Financiero
+C,Citigroup,Financiero
+WFC,Wells Fargo,Financiero
+AXP,American Express,Financiero
+BLK,BlackRock,Financiero

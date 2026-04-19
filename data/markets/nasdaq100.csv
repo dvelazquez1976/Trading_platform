@@ -1,0 +1,41 @@
+ticker,name,sector
+AAPL,Apple,Tecnología
+MSFT,Microsoft,Tecnología
+NVDA,NVIDIA,Tecnología
+AMZN,Amazon,Consumo discrecional
+META,Meta Platforms,Tecnología
+GOOGL,Alphabet A,Tecnología
+GOOG,Alphabet C,Tecnología
+TSLA,Tesla,Automoción
+AVGO,Broadcom,Tecnología
+ASML,ASML Holding,Tecnología
+COST,Costco,Consumo básico
+NFLX,Netflix,Media
+AZN,AstraZeneca,Salud
+AMD,Advanced Micro Devices,Tecnología
+ADBE,Adobe,Tecnología
+QCOM,Qualcomm,Tecnología
+PEP,PepsiCo,Consumo básico
+CSCO,Cisco,Tecnología
+TXN,Texas Instruments,Tecnología
+INTC,Intel,Tecnología
+AMAT,Applied Materials,Tecnología
+MU,Micron Technology,Tecnología
+LRCX,Lam Research,Tecnología
+KLAC,KLA Corporation,Tecnología
+SNPS,Synopsys,Tecnología
+CDNS,Cadence Design Systems,Tecnología
+PANW,Palo Alto Networks,Tecnología
+CRWD,CrowdStrike,Tecnología
+ORLY,O'Reilly Automotive,Consumo discrecional
+MNST,Monster Beverage,Consumo básico
+REGN,Regeneron Pharmaceuticals,Salud
+MRVL,Marvell Technology,Tecnología
+DXCM,DexCom,Salud
+ABNB,Airbnb,Consumo discrecional
+TEAM,Atlassian,Tecnología
+WDAY,Workday,Tecnología
+TTWO,Take-Two Interactive,Media
+SIRI,Sirius XM,Media
+PCAR,PACCAR,Industrial
+ROST,Ross Stores,Consumo discrecional

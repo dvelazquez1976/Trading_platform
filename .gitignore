@@ -54,8 +54,19 @@ htmlcov/
 control.txt
 salida.txt
 
-# Output files
+# Output files (generadas por la app — no versionar)
 salidas/
+data/outputs/
+data/cache/
+data/db/
+LastQuotes.txt
+Salida.txt
+
+# Secretos y claves API
+.env
+.env.*
+!.env.example
+API_Key/
 
 # Certificates and sensitive data
 certs/

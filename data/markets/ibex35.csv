@@ -1,0 +1,36 @@
+ticker,name,sector
+SAN.MC,Banco Santander,Financiero
+BBVA.MC,BBVA,Financiero
+ITX.MC,Inditex,Consumo discrecional
+TEF.MC,Telefónica,Telecomunicaciones
+REP.MC,Repsol,Energía
+IBE.MC,Iberdrola,Utilities
+CABK.MC,CaixaBank,Financiero
+MAP.MC,Mapfre,Financiero
+ACS.MC,ACS,Construcción
+FER.MC,Ferrovial,Construcción
+AMS.MC,Amadeus IT,Tecnología
+SAB.MC,Banco Sabadell,Financiero
+AENA.MC,AENA,Transporte
+ELE.MC,Endesa,Utilities
+GRF.MC,Grifols,Salud
+IAG.MC,IAG,Transporte
+MTS.MC,ArcelorMittal,Materiales
+NTGY.MC,Naturgy,Utilities
+RED.MC,Red Eléctrica,Utilities
+COL.MC,Inmobiliaria Colonial,Inmobiliario
+MRL.MC,Merlin Properties,Inmobiliario
+CIE.MC,CIE Automotive,Automoción
+VIS.MC,Viscofan,Consumo básico
+LOG.MC,Logista,Distribución
+BKT.MC,Bankinter,Financiero
+ENG.MC,Enagás,Utilities
+CLNX.MC,Cellnex Telecom,Telecomunicaciones
+ACX.MC,Acerinox,Materiales
+PHM.MC,Pharma Mar,Salud
+MFE-A.MC,Mediaset España,Media
+SGRE.MC,Siemens Gamesa,Energías renovables
+SOL.MC,Solaria,Energías renovables
+ALM.MC,Almirall,Salud
+ALAB.MC,Alabastros (Acciona),Utilities
+ANE.MC,Anima,Financiero

@@ -1,0 +1,41 @@
+ticker,name,sector
+SAP.DE,SAP,Tecnología
+SIE.DE,Siemens,Industrial
+ALV.DE,Allianz,Financiero
+MUV2.DE,Munich Re,Financiero
+DTE.DE,Deutsche Telekom,Telecomunicaciones
+BAYN.DE,Bayer,Salud
+BMW.DE,BMW,Automoción
+MBG.DE,Mercedes-Benz Group,Automoción
+VOW3.DE,Volkswagen Vz,Automoción
+ADS.DE,Adidas,Consumo discrecional
+BAS.DE,BASF,Materiales
+INGA.DE,ING Group,Financiero
+DBK.DE,Deutsche Bank,Financiero
+DPW.DE,Deutsche Post,Industrial
+RWE.DE,RWE,Utilities
+E.ON.DE,E.ON,Utilities
+HEN3.DE,Henkel Vz,Consumo básico
+MRK.DE,Merck KGaA,Salud
+FRE.DE,Fresenius,Salud
+FME.DE,Fresenius Medical,Salud
+HEI.DE,HeidelbergCement,Materiales
+MTX.DE,MTU Aero Engines,Industrial
+ZAL.DE,Zalando,Consumo discrecional
+ENR.DE,Siemens Energy,Energía
+AIXA.DE,Aixtron,Tecnología
+QIA.DE,Qiagen,Salud
+VNA.DE,Vonovia,Inmobiliario
+LIN.DE,Linde,Materiales
+CON.DE,Continental,Automoción
+P911.DE,Porsche AG,Automoción
+BEI.DE,Beiersdorf,Consumo básico
+HOT.DE,Sartorius Vz,Salud
+DHER.DE,Delivery Hero,Consumo discrecional
+BOSS.DE,Hugo Boss,Consumo discrecional
+SHL.DE,Siemens Healthineers,Salud
+G1A.DE,GEA Group,Industrial
+MDIZ.DE,Merck Fin,Financiero
+PUM.DE,Puma,Consumo discrecional
+SDAX.DE,Deutsche Boerse,Financiero
+AF.DE,Air France KLM,Transporte

@@ -1,0 +1,36 @@
+ticker,name,sector
+AIR.PA,Airbus,Industrial
+OR.PA,L'Oréal,Consumo básico
+MC.PA,LVMH,Consumo discrecional
+SAN.PA,Sanofi,Salud
+BNP.PA,BNP Paribas,Financiero
+SU.PA,Schneider Electric,Industrial
+RI.PA,Pernod Ricard,Consumo básico
+KER.PA,Kering,Consumo discrecional
+SGO.PA,Saint-Gobain,Materiales
+CAP.PA,Capgemini,Tecnología
+CS.PA,AXA,Financiero
+EL.PA,EssilorLuxottica,Salud
+BN.PA,Danone,Consumo básico
+DG.PA,Vinci,Construcción
+RMS.PA,Hermès International,Consumo discrecional
+SAP.DE,SAP,Tecnología
+SIE.DE,Siemens,Industrial
+ALV.DE,Allianz,Financiero
+MUV2.DE,Munich Re,Financiero
+DTE.DE,Deutsche Telekom,Telecomunicaciones
+BAYN.DE,Bayer,Salud
+BMW.DE,BMW,Automoción
+SAN.MC,Banco Santander,Financiero
+BBVA.MC,BBVA,Financiero
+ITX.MC,Inditex,Consumo discrecional
+IBE.MC,Iberdrola,Utilities
+PHIA.AS,Philips,Salud
+ASML.AS,ASML Holding,Tecnología
+ING.AS,ING Groep,Financiero
+RDSA.AS,Shell,Energía
+UCG.MI,UniCredit,Financiero
+ISP.MI,Intesa Sanpaolo,Financiero
+ENI.MI,ENI,Energía
+ENEL.MI,Enel,Utilities
+RACE.MI,Ferrari,Automoción

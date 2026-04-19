@@ -1,0 +1,1 @@
+from trading_platform.signals.generator import generar_senales

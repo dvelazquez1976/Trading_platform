@@ -1,0 +1,1 @@
+from trading_platform.indicators.basic import calcular_indicadores
