@@ -83,10 +83,25 @@ with tab_prov:
     st.caption("Las claves se guardan en config.json. Para mayor seguridad usa variables de entorno (.env).")
 
     api_keys = prov_cfg.get("api_keys", {})
-    av_key = st.text_input("Alpha Vantage API Key", value=api_keys.get("alpha_vantage", ""),
-                            type="password", placeholder="Tu clave aquí")
-    if av_key:
-        cfg["providers"]["api_keys"]["alpha_vantage"] = av_key
+    cfg["providers"].setdefault("api_keys", {})
+
+    st.markdown("Los proveedores de pago se activan implementando su clase en `providers/_stubs.py`.")
+
+    _providers_info = {
+        "fmp":      ("Financial Modeling Prep", "https://financialmodelingprep.com", "~22 USD/mes — fundamentales históricos, ratings, dividendos"),
+        "eodhd":    ("EOD Historical Data",     "https://eodhd.com",                 "~20 USD/mes — OHLCV 70+ mercados, dividendos precisos"),
+        "polygon":  ("Polygon.io",              "https://polygon.io",                "~29 USD/mes — real-time US, opciones, cripto"),
+        "finnhub":  ("Finnhub",                 "https://finnhub.io",                "Free tier US / pago para EU — earnings, news, sentimiento"),
+    }
+    for key, (label, _url, note) in _providers_info.items():
+        col_k, col_v = st.columns([2, 3])
+        with col_k:
+            st.caption(f"**{label}**")
+            st.caption(note)
+        with col_v:
+            val = st.text_input(f"{label} API Key", value=api_keys.get(key, ""),
+                                type="password", placeholder="Vacío = no activo", key=f"key_{key}")
+            cfg["providers"]["api_keys"][key] = val
 
 with tab_ui:
     st.subheader("Interfaz")
