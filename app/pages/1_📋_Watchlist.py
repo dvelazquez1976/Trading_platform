@@ -25,7 +25,7 @@ MARKETS_DIR = Path(__file__).parent.parent.parent / "data" / "markets"
 
 MARKET_FILES = {
     "IBEX 35": "ibex35.csv",
-    "S&P 500 (muestra)": "sp500_sample.csv",
+    "S&P 500": "sp500.csv",
     "NASDAQ 100": "nasdaq100.csv",
     "DAX 40": "dax40.csv",
     "CAC 40": "cac40.csv",

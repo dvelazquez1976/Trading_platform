@@ -122,10 +122,10 @@ with tab_ui:
 
     default_market = st.selectbox(
         "Mercado por defecto",
-        ["ibex35", "sp500_sample", "nasdaq100", "dax40", "cac40", "eurostoxx50", "ftse100", "nikkei225_sample"],
+        ["ibex35", "sp500", "nasdaq100", "dax40", "cac40", "eurostoxx50", "ftse100", "nikkei225_sample"],
         index=0 if ui_cfg.get("default_market", "ibex35") not in
-              ["ibex35", "sp500_sample", "nasdaq100", "dax40", "cac40", "eurostoxx50", "ftse100", "nikkei225_sample"]
-        else ["ibex35", "sp500_sample", "nasdaq100", "dax40", "cac40", "eurostoxx50", "ftse100", "nikkei225_sample"]
+              ["ibex35", "sp500", "nasdaq100", "dax40", "cac40", "eurostoxx50", "ftse100", "nikkei225_sample"]
+        else ["ibex35", "sp500", "nasdaq100", "dax40", "cac40", "eurostoxx50", "ftse100", "nikkei225_sample"]
               .index(ui_cfg.get("default_market", "ibex35"))
     )
 

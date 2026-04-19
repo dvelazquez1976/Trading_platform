@@ -1,0 +1,504 @@
+ticker,name,sector
+MMM,3M,Industriales
+AOS,A. O. Smith,Industriales
+ABT,Abbott Laboratories,Salud
+ABBV,AbbVie,Salud
+ACN,Accenture,Tecnología
+ADBE,Adobe Inc.,Tecnología
+AMD,Advanced Micro Devices,Tecnología
+AES,AES Corporation,Utilities
+AFL,Aflac,Finanzas
+A,Agilent Technologies,Salud
+APD,Air Products,Materiales
+ABNB,Airbnb,Consumo discrecional
+AKAM,Akamai Technologies,Tecnología
+ALB,Albemarle Corporation,Materiales
+ARE,Alexandria Real Estate Equities,Inmobiliario
+ALGN,Align Technology,Salud
+ALLE,Allegion,Industriales
+LNT,Alliant Energy,Utilities
+ALL,Allstate,Finanzas
+GOOGL,Alphabet Inc. (Class A),Comunicaciones
+GOOG,Alphabet Inc. (Class C),Comunicaciones
+MO,Altria,Consumo básico
+AMZN,Amazon,Consumo discrecional
+AMCR,Amcor,Materiales
+AEE,Ameren,Utilities
+AEP,American Electric Power,Utilities
+AXP,American Express,Finanzas
+AIG,American International Group,Finanzas
+AMT,American Tower,Inmobiliario
+AWK,American Water Works,Utilities
+AMP,Ameriprise Financial,Finanzas
+AME,Ametek,Industriales
+AMGN,Amgen,Salud
+APH,Amphenol,Tecnología
+ADI,Analog Devices,Tecnología
+AON,Aon plc,Finanzas
+APA,APA Corporation,Energía
+APO,Apollo Global Management,Finanzas
+AAPL,Apple Inc.,Tecnología
+AMAT,Applied Materials,Tecnología
+APP,AppLovin,Tecnología
+APTV,Aptiv,Consumo discrecional
+ACGL,Arch Capital Group,Finanzas
+ADM,Archer Daniels Midland,Consumo básico
+ARES,Ares Management,Finanzas
+ANET,Arista Networks,Tecnología
+AJG,Arthur J. Gallagher & Co.,Finanzas
+AIZ,Assurant,Finanzas
+T,AT&T,Comunicaciones
+ATO,Atmos Energy,Utilities
+ADSK,Autodesk,Tecnología
+ADP,Automatic Data Processing,Industriales
+AZO,AutoZone,Consumo discrecional
+AVB,AvalonBay Communities,Inmobiliario
+AVY,Avery Dennison,Materiales
+AXON,Axon Enterprise,Industriales
+BKR,Baker Hughes,Energía
+BALL,Ball Corporation,Materiales
+BAC,Bank of America,Finanzas
+BAX,Baxter International,Salud
+BDX,Becton Dickinson,Salud
+BRK-B,Berkshire Hathaway,Finanzas
+BBY,Best Buy,Consumo discrecional
+TECH,Bio-Techne,Salud
+BIIB,Biogen,Salud
+BLK,BlackRock,Finanzas
+BX,Blackstone Inc.,Finanzas
+XYZ,"Block, Inc.",Finanzas
+BK,BNY Mellon,Finanzas
+BA,Boeing,Industriales
+BKNG,Booking Holdings,Consumo discrecional
+BSX,Boston Scientific,Salud
+BMY,Bristol Myers Squibb,Salud
+AVGO,Broadcom,Tecnología
+BR,Broadridge Financial Solutions,Industriales
+BRO,Brown & Brown,Finanzas
+BF-B,Brown–Forman,Consumo básico
+BLDR,Builders FirstSource,Industriales
+BG,Bunge Global,Consumo básico
+BXP,"BXP, Inc.",Inmobiliario
+CHRW,C.H. Robinson,Industriales
+CDNS,Cadence Design Systems,Tecnología
+CPT,Camden Property Trust,Inmobiliario
+CPB,Campbell's Company (The),Consumo básico
+COF,Capital One,Finanzas
+CAH,Cardinal Health,Salud
+CCL,Carnival,Consumo discrecional
+CARR,Carrier Global,Industriales
+CVNA,Carvana,Consumo discrecional
+CASY,Casey's,Consumo básico
+CAT,Caterpillar Inc.,Industriales
+CBOE,Cboe Global Markets,Finanzas
+CBRE,CBRE Group,Inmobiliario
+CDW,CDW Corporation,Tecnología
+COR,Cencora,Salud
+CNC,Centene Corporation,Salud
+CNP,CenterPoint Energy,Utilities
+CF,CF Industries,Materiales
+CRL,Charles River Laboratories,Salud
+SCHW,Charles Schwab Corporation,Finanzas
+CHTR,Charter Communications,Comunicaciones
+CVX,Chevron Corporation,Energía
+CMG,Chipotle Mexican Grill,Consumo discrecional
+CB,Chubb Limited,Finanzas
+CHD,Church & Dwight,Consumo básico
+CIEN,Ciena,Tecnología
+CI,Cigna,Salud
+CINF,Cincinnati Financial,Finanzas
+CTAS,Cintas,Industriales
+CSCO,Cisco,Tecnología
+C,Citigroup,Finanzas
+CFG,Citizens Financial Group,Finanzas
+CLX,Clorox,Consumo básico
+CME,CME Group,Finanzas
+CMS,CMS Energy,Utilities
+KO,Coca-Cola Company (The),Consumo básico
+CTSH,Cognizant,Tecnología
+COHR,Coherent Corp.,Tecnología
+COIN,Coinbase,Finanzas
+CL,Colgate-Palmolive,Consumo básico
+CMCSA,Comcast,Comunicaciones
+FIX,Comfort Systems USA,Industriales
+CAG,Conagra Brands,Consumo básico
+COP,ConocoPhillips,Energía
+ED,Consolidated Edison,Utilities
+STZ,Constellation Brands,Consumo básico
+CEG,Constellation Energy,Utilities
+COO,Cooper Companies (The),Salud
+CPRT,Copart,Industriales
+GLW,Corning Inc.,Tecnología
+CPAY,Corpay,Finanzas
+CTVA,Corteva,Materiales
+CSGP,CoStar Group,Inmobiliario
+COST,Costco,Consumo básico
+CTRA,Coterra,Energía
+CRH,CRH plc,Materiales
+CRWD,CrowdStrike,Tecnología
+CCI,Crown Castle,Inmobiliario
+CSX,CSX Corporation,Industriales
+CMI,Cummins,Industriales
+CVS,CVS Health,Salud
+DHR,Danaher Corporation,Salud
+DRI,Darden Restaurants,Consumo discrecional
+DDOG,Datadog,Tecnología
+DVA,DaVita,Salud
+DECK,Deckers Brands,Consumo discrecional
+DE,Deere & Company,Industriales
+DELL,Dell Technologies,Tecnología
+DAL,Delta Air Lines,Industriales
+DVN,Devon Energy,Energía
+DXCM,Dexcom,Salud
+FANG,Diamondback Energy,Energía
+DLR,Digital Realty,Inmobiliario
+DG,Dollar General,Consumo básico
+DLTR,Dollar Tree,Consumo básico
+D,Dominion Energy,Utilities
+DPZ,Domino's,Consumo discrecional
+DASH,DoorDash,Consumo discrecional
+DOV,Dover Corporation,Industriales
+DOW,Dow Inc.,Materiales
+DHI,D. R. Horton,Consumo discrecional
+DTE,DTE Energy,Utilities
+DUK,Duke Energy,Utilities
+DD,DuPont,Materiales
+ETN,Eaton Corporation,Industriales
+EBAY,eBay Inc.,Consumo discrecional
+SATS,EchoStar,Comunicaciones
+ECL,Ecolab,Materiales
+EIX,Edison International,Utilities
+EW,Edwards Lifesciences,Salud
+EA,Electronic Arts,Comunicaciones
+ELV,Elevance Health,Salud
+EME,Emcor,Industriales
+EMR,Emerson Electric,Industriales
+ETR,Entergy,Utilities
+EOG,EOG Resources,Energía
+EPAM,EPAM Systems,Tecnología
+EQT,EQT Corporation,Energía
+EFX,Equifax,Industriales
+EQIX,Equinix,Inmobiliario
+EQR,Equity Residential,Inmobiliario
+ERIE,Erie Indemnity,Finanzas
+ESS,Essex Property Trust,Inmobiliario
+EL,Estée Lauder Companies (The),Consumo básico
+EG,Everest Group,Finanzas
+EVRG,Evergy,Utilities
+ES,Eversource Energy,Utilities
+EXC,Exelon,Utilities
+EXE,Expand Energy,Energía
+EXPE,Expedia Group,Consumo discrecional
+EXPD,Expeditors International,Industriales
+EXR,Extra Space Storage,Inmobiliario
+XOM,ExxonMobil,Energía
+FFIV,"F5, Inc.",Tecnología
+FDS,FactSet,Finanzas
+FICO,Fair Isaac,Tecnología
+FAST,Fastenal,Industriales
+FRT,Federal Realty Investment Trust,Inmobiliario
+FDX,FedEx,Industriales
+FIS,Fidelity National Information Services,Finanzas
+FITB,Fifth Third Bancorp,Finanzas
+FSLR,First Solar,Tecnología
+FE,FirstEnergy,Utilities
+FISV,Fiserv,Finanzas
+F,Ford Motor Company,Consumo discrecional
+FTNT,Fortinet,Tecnología
+FTV,Fortive,Industriales
+FOXA,Fox Corporation (Class A),Comunicaciones
+FOX,Fox Corporation (Class B),Comunicaciones
+BEN,Franklin Resources,Finanzas
+FCX,Freeport-McMoRan,Materiales
+GRMN,Garmin,Consumo discrecional
+IT,Gartner,Tecnología
+GE,GE Aerospace,Industriales
+GEHC,GE HealthCare,Salud
+GEV,GE Vernova,Industriales
+GEN,Gen Digital,Tecnología
+GNRC,Generac,Industriales
+GD,General Dynamics,Industriales
+GIS,General Mills,Consumo básico
+GM,General Motors,Consumo discrecional
+GPC,Genuine Parts Company,Consumo discrecional
+GILD,Gilead Sciences,Salud
+GPN,Global Payments,Finanzas
+GL,Globe Life,Finanzas
+GDDY,GoDaddy,Tecnología
+GS,Goldman Sachs,Finanzas
+HAL,Halliburton,Energía
+HIG,Hartford (The),Finanzas
+HAS,Hasbro,Consumo discrecional
+HCA,HCA Healthcare,Salud
+DOC,Healthpeak Properties,Inmobiliario
+HSIC,Henry Schein,Salud
+HSY,Hershey Company (The),Consumo básico
+HPE,Hewlett Packard Enterprise,Tecnología
+HLT,Hilton Worldwide,Consumo discrecional
+HD,Home Depot (The),Consumo discrecional
+HON,Honeywell,Industriales
+HRL,Hormel Foods,Consumo básico
+HST,Host Hotels & Resorts,Inmobiliario
+HWM,Howmet Aerospace,Industriales
+HPQ,HP Inc.,Tecnología
+HUBB,Hubbell Incorporated,Industriales
+HUM,Humana,Salud
+HBAN,Huntington Bancshares,Finanzas
+HII,Huntington Ingalls Industries,Industriales
+IBM,IBM,Tecnología
+IEX,IDEX Corporation,Industriales
+IDXX,Idexx Laboratories,Salud
+ITW,Illinois Tool Works,Industriales
+INCY,Incyte,Salud
+IR,Ingersoll Rand,Industriales
+PODD,Insulet Corporation,Salud
+INTC,Intel,Tecnología
+IBKR,Interactive Brokers,Finanzas
+ICE,Intercontinental Exchange,Finanzas
+IFF,International Flavors & Fragrances,Materiales
+IP,International Paper,Materiales
+INTU,Intuit,Tecnología
+ISRG,Intuitive Surgical,Salud
+IVZ,Invesco,Finanzas
+INVH,Invitation Homes,Inmobiliario
+IQV,IQVIA,Salud
+IRM,Iron Mountain,Inmobiliario
+JBHT,J.B. Hunt,Industriales
+JBL,Jabil,Tecnología
+JKHY,Jack Henry & Associates,Finanzas
+J,Jacobs Solutions,Industriales
+JNJ,Johnson & Johnson,Salud
+JCI,Johnson Controls,Industriales
+JPM,JPMorgan Chase,Finanzas
+KVUE,Kenvue,Consumo básico
+KDP,Keurig Dr Pepper,Consumo básico
+KEY,KeyCorp,Finanzas
+KEYS,Keysight Technologies,Tecnología
+KMB,Kimberly-Clark,Consumo básico
+KIM,Kimco Realty,Inmobiliario
+KMI,Kinder Morgan,Energía
+KKR,KKR & Co.,Finanzas
+KLAC,KLA Corporation,Tecnología
+KHC,Kraft Heinz,Consumo básico
+KR,Kroger,Consumo básico
+LHX,L3Harris,Industriales
+LH,Labcorp,Salud
+LRCX,Lam Research,Tecnología
+LVS,Las Vegas Sands,Consumo discrecional
+LDOS,Leidos,Industriales
+LEN,Lennar,Consumo discrecional
+LII,Lennox International,Industriales
+LLY,Lilly (Eli),Salud
+LIN,Linde plc,Materiales
+LYV,Live Nation Entertainment,Comunicaciones
+LMT,Lockheed Martin,Industriales
+L,Loews Corporation,Finanzas
+LOW,Lowe's,Consumo discrecional
+LULU,Lululemon Athletica,Consumo discrecional
+LITE,Lumentum,Tecnología
+LYB,LyondellBasell,Materiales
+MTB,M&T Bank,Finanzas
+MPC,Marathon Petroleum,Energía
+MAR,Marriott International,Consumo discrecional
+MRSH,Marsh McLennan,Finanzas
+MLM,Martin Marietta Materials,Materiales
+MAS,Masco,Industriales
+MA,Mastercard,Finanzas
+MKC,McCormick & Company,Consumo básico
+MCD,McDonald's,Consumo discrecional
+MCK,McKesson Corporation,Salud
+MDT,Medtronic,Salud
+MRK,Merck & Co.,Salud
+META,Meta Platforms,Comunicaciones
+MET,MetLife,Finanzas
+MTD,Mettler Toledo,Salud
+MGM,MGM Resorts,Consumo discrecional
+MCHP,Microchip Technology,Tecnología
+MU,Micron Technology,Tecnología
+MSFT,Microsoft,Tecnología
+MAA,Mid-America Apartment Communities,Inmobiliario
+MRNA,Moderna,Salud
+TAP,Molson Coors Beverage Company,Consumo básico
+MDLZ,Mondelez International,Consumo básico
+MPWR,Monolithic Power Systems,Tecnología
+MNST,Monster Beverage,Consumo básico
+MCO,Moody's Corporation,Finanzas
+MS,Morgan Stanley,Finanzas
+MOS,Mosaic Company (The),Materiales
+MSI,Motorola Solutions,Tecnología
+MSCI,MSCI Inc.,Finanzas
+NDAQ,"Nasdaq, Inc.",Finanzas
+NTAP,NetApp,Tecnología
+NFLX,Netflix,Comunicaciones
+NEM,Newmont,Materiales
+NWSA,News Corp (Class A),Comunicaciones
+NWS,News Corp (Class B),Comunicaciones
+NEE,NextEra Energy,Utilities
+NKE,"Nike, Inc.",Consumo discrecional
+NI,NiSource,Utilities
+NDSN,Nordson Corporation,Industriales
+NSC,Norfolk Southern,Industriales
+NTRS,Northern Trust,Finanzas
+NOC,Northrop Grumman,Industriales
+NCLH,Norwegian Cruise Line Holdings,Consumo discrecional
+NRG,NRG Energy,Utilities
+NUE,Nucor,Materiales
+NVDA,Nvidia,Tecnología
+NVR,"NVR, Inc.",Consumo discrecional
+NXPI,NXP Semiconductors,Tecnología
+ORLY,O’Reilly Automotive,Consumo discrecional
+OXY,Occidental Petroleum,Energía
+ODFL,Old Dominion,Industriales
+OMC,Omnicom Group,Comunicaciones
+ON,ON Semiconductor,Tecnología
+OKE,Oneok,Energía
+ORCL,Oracle Corporation,Tecnología
+OTIS,Otis Worldwide,Industriales
+PCAR,Paccar,Industriales
+PKG,Packaging Corporation of America,Materiales
+PLTR,Palantir Technologies,Tecnología
+PANW,Palo Alto Networks,Tecnología
+PSKY,Paramount Skydance Corporation,Comunicaciones
+PH,Parker Hannifin,Industriales
+PAYX,Paychex,Industriales
+PYPL,PayPal,Finanzas
+PNR,Pentair,Industriales
+PEP,PepsiCo,Consumo básico
+PFE,Pfizer,Salud
+PCG,PG&E Corporation,Utilities
+PM,Philip Morris International,Consumo básico
+PSX,Phillips 66,Energía
+PNW,Pinnacle West Capital,Utilities
+PNC,PNC Financial Services,Finanzas
+POOL,Pool Corporation,Consumo discrecional
+PPG,PPG Industries,Materiales
+PPL,PPL Corporation,Utilities
+PFG,Principal Financial Group,Finanzas
+PG,Procter & Gamble,Consumo básico
+PGR,Progressive Corporation,Finanzas
+PLD,Prologis,Inmobiliario
+PRU,Prudential Financial,Finanzas
+PEG,Public Service Enterprise Group,Utilities
+PTC,PTC Inc.,Tecnología
+PSA,Public Storage,Inmobiliario
+PHM,PulteGroup,Consumo discrecional
+PWR,Quanta Services,Industriales
+QCOM,Qualcomm,Tecnología
+DGX,Quest Diagnostics,Salud
+Q,Qnity Electronics,Tecnología
+RL,Ralph Lauren Corporation,Consumo discrecional
+RJF,Raymond James Financial,Finanzas
+RTX,RTX Corporation,Industriales
+O,Realty Income,Inmobiliario
+REG,Regency Centers,Inmobiliario
+REGN,Regeneron Pharmaceuticals,Salud
+RF,Regions Financial Corporation,Finanzas
+RSG,Republic Services,Industriales
+RMD,ResMed,Salud
+RVTY,Revvity,Salud
+HOOD,Robinhood Markets,Finanzas
+ROK,Rockwell Automation,Industriales
+ROL,"Rollins, Inc.",Industriales
+ROP,Roper Technologies,Tecnología
+ROST,Ross Stores,Consumo discrecional
+RCL,Royal Caribbean Group,Consumo discrecional
+SPGI,S&P Global,Finanzas
+CRM,Salesforce,Tecnología
+SNDK,Sandisk,Tecnología
+SBAC,SBA Communications,Inmobiliario
+SLB,Schlumberger,Energía
+STX,Seagate Technology,Tecnología
+SRE,Sempra,Utilities
+NOW,ServiceNow,Tecnología
+SHW,Sherwin-Williams,Materiales
+SPG,Simon Property Group,Inmobiliario
+SWKS,Skyworks Solutions,Tecnología
+SJM,J.M. Smucker Company (The),Consumo básico
+SW,Smurfit Westrock,Materiales
+SNA,Snap-on,Industriales
+SOLV,Solventum,Salud
+SO,Southern Company,Utilities
+LUV,Southwest Airlines,Industriales
+SWK,Stanley Black & Decker,Industriales
+SBUX,Starbucks,Consumo discrecional
+STT,State Street Corporation,Finanzas
+STLD,Steel Dynamics,Materiales
+STE,Steris,Salud
+SYK,Stryker Corporation,Salud
+SMCI,Supermicro,Tecnología
+SYF,Synchrony Financial,Finanzas
+SNPS,Synopsys,Tecnología
+SYY,Sysco,Consumo básico
+TMUS,T-Mobile US,Comunicaciones
+TROW,T. Rowe Price,Finanzas
+TTWO,Take-Two Interactive,Comunicaciones
+TPR,"Tapestry, Inc.",Consumo discrecional
+TRGP,Targa Resources,Energía
+TGT,Target Corporation,Consumo básico
+TEL,TE Connectivity,Tecnología
+TDY,Teledyne Technologies,Tecnología
+TER,Teradyne,Tecnología
+TSLA,"Tesla, Inc.",Consumo discrecional
+TXN,Texas Instruments,Tecnología
+TPL,Texas Pacific Land Corporation,Energía
+TXT,Textron,Industriales
+TMO,Thermo Fisher Scientific,Salud
+TJX,TJX Companies,Consumo discrecional
+TKO,TKO Group Holdings,Comunicaciones
+TTD,Trade Desk (The),Comunicaciones
+TSCO,Tractor Supply,Consumo discrecional
+TT,Trane Technologies,Industriales
+TDG,TransDigm Group,Industriales
+TRV,Travelers Companies (The),Finanzas
+TRMB,Trimble Inc.,Tecnología
+TFC,Truist Financial,Finanzas
+TYL,Tyler Technologies,Tecnología
+TSN,Tyson Foods,Consumo básico
+USB,U.S. Bancorp,Finanzas
+UBER,Uber,Industriales
+UDR,"UDR, Inc.",Inmobiliario
+ULTA,Ulta Beauty,Consumo discrecional
+UNP,Union Pacific Corporation,Industriales
+UAL,United Airlines Holdings,Industriales
+UPS,United Parcel Service,Industriales
+URI,United Rentals,Industriales
+UNH,UnitedHealth Group,Salud
+UHS,Universal Health Services,Salud
+VLO,Valero Energy,Energía
+VTR,Ventas,Inmobiliario
+VLTO,Veralto,Industriales
+VRSN,Verisign,Tecnología
+VRSK,Verisk Analytics,Industriales
+VZ,Verizon,Comunicaciones
+VRTX,Vertex Pharmaceuticals,Salud
+VRT,Vertiv,Industriales
+VTRS,Viatris,Salud
+VICI,Vici Properties,Inmobiliario
+V,Visa Inc.,Finanzas
+VST,Vistra Corp.,Utilities
+VMC,Vulcan Materials Company,Materiales
+WRB,W. R. Berkley Corporation,Finanzas
+GWW,W. W. Grainger,Industriales
+WAB,Wabtec,Industriales
+WMT,Walmart,Consumo básico
+DIS,Walt Disney Company (The),Comunicaciones
+WBD,Warner Bros. Discovery,Comunicaciones
+WM,Waste Management,Industriales
+WAT,Waters Corporation,Salud
+WEC,WEC Energy Group,Utilities
+WFC,Wells Fargo,Finanzas
+WELL,Welltower,Inmobiliario
+WST,West Pharmaceutical Services,Salud
+WDC,Western Digital,Tecnología
+WY,Weyerhaeuser,Inmobiliario
+WSM,"Williams-Sonoma, Inc.",Consumo discrecional
+WMB,Williams Companies,Energía
+WTW,Willis Towers Watson,Finanzas
+WDAY,"Workday, Inc.",Tecnología
+WYNN,Wynn Resorts,Consumo discrecional
+XEL,Xcel Energy,Utilities
+XYL,Xylem Inc.,Industriales
+YUM,Yum! Brands,Consumo discrecional
+ZBRA,Zebra Technologies,Tecnología
+ZBH,Zimmer Biomet,Salud
+ZTS,Zoetis,Salud
