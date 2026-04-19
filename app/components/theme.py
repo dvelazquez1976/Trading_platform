@@ -96,9 +96,19 @@ def sparkline(
         color = "#16a34a" if pct >= 0 else "#dc2626"
 
     fill = "tozeroy" if show_area else "none"
-    fill_color = color.replace(")", ", 0.12)").replace("rgb(", "rgba(") if show_area else "rgba(0,0,0,0)"
-    if fill_color == color:
-        fill_color = color + "20"
+    if not show_area:
+        fill_color = "rgba(0,0,0,0)"
+    elif color.startswith("rgb("):
+        fill_color = color.replace("rgb(", "rgba(").replace(")", ", 0.12)")
+    elif color.startswith("#") and len(color) in (4, 7):
+        # Convertir hex → rgba (Plotly no acepta hex de 8 dígitos)
+        c = color.lstrip("#")
+        if len(c) == 3:
+            c = "".join(ch * 2 for ch in c)
+        r, g, b = int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
+        fill_color = f"rgba({r},{g},{b},0.12)"
+    else:
+        fill_color = "rgba(128,128,128,0.12)"
 
     fig = go.Figure(
         go.Scatter(
