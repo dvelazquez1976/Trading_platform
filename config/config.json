@@ -10,9 +10,11 @@
     "max_workers": 4
   },
   "providers": {
-    "primary": "stooq",
-    "fallback": ["yfinance"],
-    "api_keys": {}
+    "primary": "yfinance",
+    "fallback": ["stooq"],
+    "api_keys": {
+      "stooq": ""
+    }
   },
   "indicators": {
     "enabled": ["RSI", "MACD", "Bollinger", "SMA", "Williams"],

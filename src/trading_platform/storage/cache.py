@@ -16,8 +16,9 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class CacheManager:
-    def __init__(self, expiration_hours: int = 24):
-        self.cache_dir = CACHE_DIR
+    def __init__(self, expiration_hours: int = 24, cache_dir: str = None):
+        self.cache_dir = Path(cache_dir) if cache_dir else CACHE_DIR
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.expiration_hours = expiration_hours
 
     def _key(self, ticker: str, start: str, end: str) -> str:
@@ -64,11 +65,16 @@ class CacheManager:
         except Exception as e:
             logger.error(f"Error guardando cache {ticker}: {e}")
 
+    def invalidate(self, ticker: str, start: str, end: str):
+        """Borra una entrada específica de caché por clave exacta."""
+        self._path(self._key(ticker, start, end)).unlink(missing_ok=True)
+
     def clear(self, ticker: str = None):
+        """Borra todas las entradas (o las de un ticker, iterando archivos)."""
         if ticker:
             for p in self.cache_dir.glob("*.json"):
                 try:
-                    with open(p) as f:
+                    with open(p, encoding='utf-8') as f:
                         if json.load(f).get('ticker') == ticker:
                             p.unlink()
                 except Exception:

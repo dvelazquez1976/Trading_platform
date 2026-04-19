@@ -15,13 +15,14 @@ DATABASE_FILE = DB_DIR / "plataforma_trading.db"
 
 
 @contextmanager
-def get_db_connection():
+def get_db_connection(db_path: str = None):
+    path = db_path or str(DATABASE_FILE)
     conn = None
     try:
-        conn = sqlite3.connect(DATABASE_FILE)
+        conn = sqlite3.connect(path)
         yield conn
         conn.commit()
-    except sqlite3.Error as e:
+    except sqlite3.Error:
         if conn:
             conn.rollback()
         raise
@@ -30,8 +31,8 @@ def get_db_connection():
             conn.close()
 
 
-def crear_base_de_datos():
-    with get_db_connection() as conn:
+def crear_base_de_datos(db_path: str = None):
+    with get_db_connection(db_path) as conn:
         conn.execute('''
             CREATE TABLE IF NOT EXISTS precios_acciones (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,12 +46,12 @@ def crear_base_de_datos():
                 UNIQUE(ticker, fecha)
             )
         ''')
-    logger.info(f"Base de datos inicializada: {DATABASE_FILE}")
+    logger.info(f"Base de datos inicializada: {db_path or DATABASE_FILE}")
 
 
-def guardar_datos(datos: pd.DataFrame, ticker: str):
+def guardar_datos(datos: pd.DataFrame, ticker: str, db_path: str = None):
     if datos is None or datos.empty:
-        raise ValueError("Datos vacíos")
+        return
     required = ['fecha', 'apertura', 'maximo', 'minimo', 'cierre', 'volumen']
     missing = [c for c in required if c not in datos.columns]
     if missing:
@@ -66,7 +67,7 @@ def guardar_datos(datos: pd.DataFrame, ticker: str):
         for _, row in df.iterrows()
     ]
 
-    with get_db_connection() as conn:
+    with get_db_connection(db_path) as conn:
         conn.executemany('''
             INSERT OR REPLACE INTO precios_acciones
             (ticker, fecha, apertura, maximo, minimo, cierre, volumen)

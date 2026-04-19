@@ -66,8 +66,8 @@ if run_bt:
             min_commission=min_comm,
             slippage_bps=float(slippage),
         )
-        engine = BacktestingEngine(transaction_costs=costs)
-        result = engine.run(df, strategy=strategy)
+        engine = BacktestingEngine(strategy=strategy, transaction_costs=costs)
+        result = engine.run_on_df(df)
 
     if result is None:
         st.error("El backtest no generó resultados. Revisa los datos.")

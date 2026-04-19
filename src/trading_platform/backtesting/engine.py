@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from datetime import date, timedelta
-from typing import Dict, List
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 
 from trading_platform.core.config import config_manager
@@ -12,6 +12,8 @@ from trading_platform.backtesting.costs import TransactionCosts
 from trading_platform.backtesting.metrics import calculate_metrics
 
 logger = get_logger(__name__)
+
+STRATEGIES = ["sma_crossover", "rsi_oversold", "macd_signal", "bollinger_reversion"]
 
 
 @dataclass
@@ -40,21 +42,23 @@ class Trade:
 
 
 class BacktestingEngine:
-    def __init__(self, strategy: str = 'ma_crossover', initial_capital: float = 10000.0,
-                 days: int = 730, costs: TransactionCosts = None):
-        self.strategy_name  = strategy
+    def __init__(self, strategy: str = 'sma_crossover', initial_capital: float = 10_000.0,
+                 days: int = 730, transaction_costs: TransactionCosts = None):
+        if strategy not in STRATEGIES:
+            raise ValueError(f"Estrategia '{strategy}' no reconocida. Opciones: {STRATEGIES}")
+        self.strategy_name   = strategy
         self.initial_capital = initial_capital
         self.days = days
-        self.costs = costs or TransactionCosts.from_config(config_manager.config)
-        self.trades: List[Trade] = []
+        self.costs = transaction_costs or TransactionCosts.from_config(config_manager.config)
         logger.info(f"BacktestingEngine: {strategy}, capital={initial_capital}")
 
     def run(self, tickers: List[str]) -> Dict:
+        """Descarga datos internamente y ejecuta el backtest sobre una lista de tickers."""
         from trading_platform.providers import descargar_datos
         from trading_platform.indicators.basic import calcular_indicadores
 
         all_trades = []
-        fecha_fin   = date.today()
+        fecha_fin    = date.today()
         fecha_inicio = fecha_fin - timedelta(days=self.days)
 
         for ticker in tickers:
@@ -69,10 +73,28 @@ class BacktestingEngine:
                 continue
             all_trades.extend(self._simulate(ticker, df))
 
-        return calculate_metrics(all_trades, self.initial_capital, self.days)
+        metrics = calculate_metrics(all_trades, self.initial_capital, self.days)
+        return {
+            'metrics': metrics,
+            'trades': [self._trade_to_dict(t) for t in all_trades],
+            'equity_curve': self._equity_curve(all_trades),
+        }
+
+    def run_on_df(self, df: pd.DataFrame) -> Dict:
+        """Ejecuta el backtest sobre un DataFrame ya descargado con indicadores."""
+        ticker = df['ticker'].iloc[0] if 'ticker' in df.columns else 'TICKER'
+        trades = self._simulate(ticker, df)
+        metrics = calculate_metrics(trades, self.initial_capital, self.days)
+        return {
+            'metrics': metrics,
+            'trades': [self._trade_to_dict(t) for t in trades],
+            'equity_curve': self._equity_curve(trades),
+        }
+
+    # ── Simulación ─────────────────────────────────────────────────────────
 
     def _simulate(self, ticker: str, datos: pd.DataFrame) -> List[Trade]:
-        fn = getattr(self, f'_strategy_{self.strategy_name}', self._strategy_ma_crossover)
+        fn = getattr(self, f'_strategy_{self.strategy_name}')
         trades = []
         position = None
         size_pct = 0.25
@@ -104,36 +126,48 @@ class BacktestingEngine:
 
     # ── Estrategias ────────────────────────────────────────────────────────
 
-    def _strategy_ma_crossover(self, row, prev) -> str:
+    def _strategy_sma_crossover(self, row, prev) -> str:
         if pd.isna(row.get('SMA_30')) or pd.isna(row.get('SMA_60')): return 'HOLD'
         if row['SMA_30'] > row['SMA_60'] and prev['SMA_30'] <= prev['SMA_60']: return 'BUY'
         if row['SMA_30'] < row['SMA_60'] and prev['SMA_30'] >= prev['SMA_60']: return 'SELL'
         return 'HOLD'
 
-    def _strategy_rsi_threshold(self, row, prev) -> str:
+    def _strategy_rsi_oversold(self, row, prev) -> str:
         if pd.isna(row.get('RSI')): return 'HOLD'
         if row['RSI'] < 30: return 'BUY'
         if row['RSI'] > 70: return 'SELL'
         return 'HOLD'
 
     def _strategy_macd_signal(self, row, prev) -> str:
-        # FIX: usa nombres estandarizados MACD / MACDs (no MACD_12_26_9)
         if pd.isna(row.get('MACD')) or pd.isna(row.get('MACDs')): return 'HOLD'
         if row['MACD'] > row['MACDs'] and prev['MACD'] <= prev['MACDs']: return 'BUY'
         if row['MACD'] < row['MACDs'] and prev['MACD'] >= prev['MACDs']: return 'SELL'
         return 'HOLD'
 
-    def _strategy_multi_indicator(self, row, prev) -> str:
-        signals = []
-        if not pd.isna(row.get('RSI')):
-            signals.append('BUY' if row['RSI'] < 30 else 'SELL' if row['RSI'] > 70 else None)
-        if not pd.isna(row.get('MACD')):
-            signals.append('BUY' if row['MACD'] > row['MACDs'] else 'SELL')
-        if not pd.isna(row.get('SMA_30')):
-            signals.append('BUY' if row['SMA_30'] > row['SMA_60'] else 'SELL')
-        signals = [s for s in signals if s]
-        buys  = signals.count('BUY')
-        sells = signals.count('SELL')
-        if buys > sells:  return 'BUY'
-        if sells > buys: return 'SELL'
+    def _strategy_bollinger_reversion(self, row, prev) -> str:
+        if pd.isna(row.get('BBL_BB')) or pd.isna(row.get('BBU_BB')): return 'HOLD'
+        if row['cierre'] < row['BBL_BB']: return 'BUY'
+        if row['cierre'] > row['BBU_BB']: return 'SELL'
         return 'HOLD'
+
+    # ── Helpers ────────────────────────────────────────────────────────────
+
+    def _trade_to_dict(self, t: Trade) -> dict:
+        return {
+            'ticker':       t.ticker,
+            'entry_date':   str(t.entry_date),
+            'exit_date':    str(t.exit_date),
+            'entry_price':  t.entry_price,
+            'exit_price':   t.exit_price,
+            'shares':       t.position_size,
+            'pnl':          round(t.profit_loss, 2),
+            'return_pct':   round(t.profit_loss_pct, 2),
+        }
+
+    def _equity_curve(self, trades: List[Trade]) -> list:
+        equity = self.initial_capital
+        curve = [{'date': str(date.today() - timedelta(days=self.days)), 'equity': equity}]
+        for t in trades:
+            equity += t.profit_loss
+            curve.append({'date': str(t.exit_date), 'equity': round(equity, 2)})
+        return curve

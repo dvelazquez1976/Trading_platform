@@ -42,7 +42,11 @@ class StooqProvider(DataProvider):
     requires_api_key = False
     supported_suffixes = ()  # soporta todo
 
-    def fetch_ohlcv(self, ticker: str, start: date, end: date) -> Optional[pd.DataFrame]:
+    def fetch_ohlcv(self, ticker: str, start, end) -> Optional[pd.DataFrame]:
+        if isinstance(start, str):
+            start = pd.to_datetime(start).date()
+        if isinstance(end, str):
+            end = pd.to_datetime(end).date()
         stooq_ticker = _yahoo_to_stooq(ticker)
         url = (
             f"https://stooq.com/q/d/l/?s={stooq_ticker}"
@@ -58,6 +62,8 @@ class StooqProvider(DataProvider):
 
         if 'No data' in raw or len(raw.strip()) < 50:
             raise ProviderError(f"Stooq sin datos para {ticker}")
+        if 'apikey' in raw or 'Get your apikey' in raw:
+            raise ProviderError(f"Stooq requiere API key — configúrala en config.json > providers > api_keys > stooq")
 
         try:
             df = pd.read_csv(io.StringIO(raw))

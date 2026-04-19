@@ -20,7 +20,8 @@ class DataOrchestrator:
     """
 
     def __init__(self, providers: List[DataProvider] = None):
-        self.providers = providers or [StooqProvider(), YFinanceProvider()]
+        # yfinance primario: Stooq ahora requiere API key (captcha en stooq.com)
+        self.providers = providers or [YFinanceProvider(), StooqProvider()]
 
     def fetch_ohlcv(self, ticker: str, start: date, end: date) -> pd.DataFrame:
         errors = []

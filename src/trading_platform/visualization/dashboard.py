@@ -136,7 +136,7 @@ const C = {{buy:'#10b981',sell:'#ef4444',acc:'{C["accent"]}',bg:'transparent',gr
 Plotly.newPlot('gauge',[{{type:'indicator',mode:'gauge+number',value:{sentimiento},
   title:{{text:'Alcista (%)',font:{{size:16,color:C.text}}}},
   gauge:{{axis:{{range:[0,100]}},bar:{{color:C.acc}},
-    steps:[{{range:[0,30],color:'rgba(239,68,68,.15)'}},{{range:[30,70],color:'rgba(100,116,139,.1)'}},{{range:[70,100],color:'rgba(16,185,129,.15)'}}}]}}
+    steps:[{{range:[0,30],color:'rgba(239,68,68,.15)'}},{{range:[30,70],color:'rgba(100,116,139,.1)'}},{{range:[70,100],color:'rgba(16,185,129,.15)'}}]}}
 }}],{{paper_bgcolor:'transparent',margin:{{t:30,b:30,l:30,r:30}},font:{{color:C.text}}}});
 Plotly.newPlot('heat',[{{type:'heatmap',x:data.map(d=>d.ticker),y:['Volatilidad'],
   z:[data.map(d=>d.vol)],colorscale:[[0,'rgba(16,185,129,.8)'],[.5,'rgba(245,158,11,.8)'],[1,'rgba(239,68,68,.8)']]
