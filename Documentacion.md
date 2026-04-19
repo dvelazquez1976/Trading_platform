@@ -1,4 +1,4 @@
-# Trading Platform — Documentación Técnica v2.0
+# Trading Platform — Documentación Técnica v2.1
 
 > Plataforma personal de análisis técnico de acciones. Arquitectura modular, UI Streamlit, múltiples mercados, sin costes de API.
 
@@ -102,8 +102,8 @@ Usuario
 providers  indicators  signals    visualization
 (datos)    (técnicos)  (señales)  (HTML + dashboard)
    │
-   ├── Stooq (primario, gratis, sin API key)
-   └── yfinance (fallback)
+   ├── yfinance (primario — gratuito, cobertura global)
+   └── Stooq (fallback — requiere API key gratuita)
 ```
 
 ### Principio de extensibilidad de proveedores
@@ -170,8 +170,8 @@ trading-platform
 
 | Archivo | Responsabilidad |
 |---------|----------------|
-| `database.py` | SQLite con `executemany()` — 10–50× más rápido que inserción fila a fila |
-| `cache.py` | Caché JSON con TTL configurable; evita descargas repetidas |
+| `database.py` | SQLite con `executemany()`; acepta `db_path` opcional para tests |
+| `cache.py` | Caché JSON con TTL; `invalidate(ticker,start,end)` y `clear()`; acepta `cache_dir` opcional |
 
 ### `indicators/`
 
@@ -193,7 +193,7 @@ trading-platform
 |---------|----------------|
 | `costs.py` | `TransactionCosts` — comisión porcentual + mínimo + slippage en bps |
 | `metrics.py` | CAGR, Sharpe, Sortino, Max Drawdown, Profit Factor, Win Rate |
-| `engine.py` | `BacktestingEngine.run()` — 4 estrategias: `sma_crossover`, `rsi_oversold`, `macd_signal`, `bollinger_reversion` |
+| `engine.py` | `BacktestingEngine` — `run(tickers)` descarga datos; `run_on_df(df)` para Streamlit; 4 estrategias |
 
 ### `visualization/`
 
@@ -214,11 +214,19 @@ trading-platform
 
 ## 5. Proveedores de datos
 
-### Stooq (primario)
+### yfinance (primario)
 
-- **Gratis**, sin registro, sin API key.
-- Descarga CSVs directamente: `https://stooq.com/q/d/l/?s={ticker}&d1=YYYYMMDD&d2=YYYYMMDD&i=d`
-- Buena cobertura para Europa (IBEX 35, DAX, CAC 40, FTSE 100) y mercados globales.
+- **Gratuito**, sin API key, cobertura global excelente (IBEX 35, SP500, DAX, FTSE 100…).
+- `auto_adjust=True` corrige precios históricos por dividendos y splits.
+- Es el proveedor activo por defecto desde v2.1 (Stooq cambió su política).
+
+> **Nota SSL en Windows**: si aparece un error SSL con `curl_cffi`, ver `docs/troubleshooting/ssl.md`. En la práctica no afecta porque yfinance funciona con la pila SSL estándar de Python.
+
+### Stooq (fallback)
+
+- **Gratuito** pero **requiere API key** (registro con captcha en [stooq.com](https://stooq.com/q/d/?s=san.es&get_apikey)).
+- Excelente cobertura europea. Descarga CSVs directamente.
+- Se activa si yfinance falla para un ticker concreto.
 - **Mapeo de sufijos** Yahoo Finance → Stooq:
 
 | Yahoo | Stooq | Mercado |
@@ -230,11 +238,10 @@ trading-platform
 | `.T`  | `.jp` | Japón |
 | _(sin sufijo)_ | `.us` | EE.UU. |
 
-### yfinance (fallback)
-
-- Activado automáticamente si Stooq no devuelve datos.
-- `auto_adjust=True` corrige precios históricos por dividendos y splits.
-- **Problema SSL en Windows** con usuarios con acentos: resuelto usando Stooq como primario. Ver `docs/troubleshooting/ssl.md`.
+Para activar Stooq con API key, añadir en `config/config.json`:
+```json
+"providers": { "api_keys": { "stooq": "TU_CLAVE_AQUI" } }
+```
 
 ---
 
@@ -346,8 +353,9 @@ TransactionCosts(
     "max_workers": 4
   },
   "providers": {
-    "primary": "stooq",
-    "fallback": ["yfinance"]
+    "primary": "yfinance",
+    "fallback": ["stooq"],
+    "api_keys": { "stooq": "" }
   },
   "indicators": {
     "advanced_enabled": false
@@ -417,7 +425,10 @@ trading-platform --days 365 --output /ruta/salida
 | **B3** | Rutas hardcodeadas al directorio de trabajo (`CWD`) | `ROOT_DIR` via `pathlib.Path(__file__).parent` en `constants.py` |
 | **B4** | API key de Alpha Vantage en texto plano versionado en git | Movida a `.env` (en `.gitignore`); plantilla en `.env.example` |
 | **B5** | `auto_adjust=False` en yfinance distorsionaba históricos pre-split | Cambiado a `auto_adjust=True` |
-| **B6** | SSL error con acentos en ruta de usuario Windows | Stooq como proveedor primario (no usa `curl_cffi`) |
+| **B6** | SSL error con acentos en ruta de usuario Windows | yfinance usa SSL estándar de Python; Stooq pasa a fallback |
+| **B7** | `SyntaxError` f-string en `dashboard.py` (Python 3.13) | `}}}` → `}}` en línea del gauge de Plotly |
+| **B8** | `BacktestingEngine` nombres de estrategias incoherentes | Unificados: `sma_crossover`, `rsi_oversold`, `macd_signal`, `bollinger_reversion` |
+| **B9** | Stooq cambió política: ahora requiere API key | Detectado el mensaje de API key; yfinance pasa a ser primario |
 
 ---
 
@@ -431,8 +442,13 @@ trading-platform --days 365 --output /ruta/salida
 - [x] Backtesting con costes de transacción reales
 - [x] 8 índices bursátiles en archivos CSV
 
+### Fase 1 completada (v2.1)
+- [x] Tests: 40 tests, 0 fallos (indicadores, señales, backtesting, storage, providers)
+- [x] `BacktestingEngine.run_on_df()` para uso desde Streamlit
+- [x] yfinance como proveedor primario (Stooq requiere API key desde 2026)
+- [x] `cache.invalidate()` y rutas configurables en storage para testabilidad
+
 ### Fase 2 — Próximos pasos
-- [ ] Tests unitarios para indicadores, señales y proveedores
 - [ ] Proveedor FRED para datos macroeconómicos (gratis)
 - [ ] Alertas por email cuando una señal cambia de estado
 - [ ] Exportación a Excel con formato ES (separador `;`, decimal `,`)
@@ -446,4 +462,4 @@ trading-platform --days 365 --output /ruta/salida
 
 ---
 
-*Documentación generada el 2026-04-19 · Trading Platform v2.0.0*
+*Última actualización: 2026-04-19 · Trading Platform v2.1.0*
